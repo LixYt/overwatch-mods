@@ -1,0 +1,1022 @@
+paramètres
+{
+	modes
+	{
+		Échauffement
+		{
+			cartes désactivées
+			{
+				Étendue de la Forge
+				Étendue de la Forge Nuit
+				Ilios
+				Île de la Forge
+				Île de la Forge Nuit
+				Népal
+				Oasis
+				Rialto
+				Salle de la Forge
+				Tour de Lijiang
+				Tour de Lijiang nouvel an lunaire
+			}
+		}
+
+		Général
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+	}
+}
+
+variables
+{
+	globale:
+		0: LocationA
+		1: LocationB
+		2: LocationC
+		3: StatusA
+		4: StatusB
+		5: StatusC
+		6: EffectA
+		7: EffectB
+		8: EffectC
+		9: ScoreTickRate
+		10: ScoreTickValue
+		11: Team1ScoreRate
+		12: Team2ScoreRate
+		13: GameStatus
+		14: Radius
+		16: IconA
+		17: IconB
+		18: IconC
+		19: CircleA
+		20: CircleB
+		21: CircleC
+		24: ScoreTeam1
+		25: ScoreTeam2
+}
+
+sous-programmes
+{
+	0: InnerEffectA
+	1: InnerEffectB
+	2: InnerEffectC
+	3: ScoreUpdate
+	4: IconUpdate
+	5: CircleUpdate
+}
+
+règle("Preparation periode")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Définir la description d’objectif(Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
+			"Kings of The 3 Hills (KoT3H) : Prepare your team !"), Visible pour et Chaîne de texte);
+		Global.GameStatus = Faux;
+		Définir le temps de jeu(30);
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Prepare your team !"));
+		Attente(30, Ignorer la condition);
+		Tuer(Tous les joueurs(Toutes les équipes), Non applicable);
+		Définir le temps de jeu(900);
+		Définir la description d’objectif(Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
+			"Kings of The 3 Hills (KoT3H) : Attack the 3 points to increase your gauge faster than the other team."),
+			Visible pour et Chaîne de texte);
+		Global.GameStatus = Vrai;
+		Réapparaître(Tous les joueurs(Toutes les équipes));
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Go ! Go ! Go !"));
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Game settings (score parameters, point radius, mode settings, init...)")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Global.Radius = 6;
+		Global.ScoreTickRate = 0.250;
+		Global.ScoreTickValue = 0.750;
+		Désactiver le calcul des points prédéfini par le mode de jeu;
+		Désactiver l’interface du mode de jeu(Tous les joueurs(Toutes les équipes));
+		Désactiver l’interface en jeu du mode de jeu(Tous les joueurs(Toutes les équipes));
+		Désactiver l’accomplissement prédéfini par le mode de jeu;
+		Désactiver l’annonceur prédéfini par le mode de jeu;
+		Désactiver la musique prédéfinie par le mode de jeu;
+		Désactiver la réapparition prédéfinie par le mode de jeu(Tous les joueurs(Toutes les équipes));
+		Global.ScoreTeam2 = 0;
+		Global.ScoreTeam1 = 0;
+		Global.StatusA = 0;
+		Global.StatusB = 0;
+		Global.StatusC = 0;
+		Sous-programme à appeler(IconUpdate);
+		Sous-programme à appeler(CircleUpdate);
+	}
+}
+
+règle("HUD : personal HUD")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Si(Équipe de(Joueur exécutant) == Équipe 1);
+			Créer du texte d’interface(Tous les joueurs(Équipe 1), Chaîne personnalisée("Your team is : {0}", Équipe de(Joueur exécutant)),
+				Non applicable, Non applicable, Haut, 0, Bleu, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Sinon;
+			Créer du texte d’interface(Tous les joueurs(Équipe 2), Chaîne personnalisée("Your team is : {0}", Équipe de(Joueur exécutant)),
+				Non applicable, Non applicable, Haut, 0, Rouge, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Fin;
+	}
+}
+
+règle("HUD : Point Icons with status")
+{
+	évènement
+	{
+		Sous-programme;
+		IconUpdate;
+	}
+
+	actions
+	{
+		Détruire du texte en jeu(Global.IconA);
+		Si(Global.StatusA == 0);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("A"), Global.LocationA, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+		Sinon Si(Global.StatusA == Équipe 1);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("A"), Global.LocationA, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Bleu, Visibilité par défaut);
+		Sinon;
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("A"), Global.LocationA, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Rouge, Visibilité par défaut);
+		Fin;
+		Global.IconA = Dernier identifiant de texte;
+		Détruire du texte en jeu(Global.IconB);
+		Si(Global.StatusB == 0);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("B"), Global.LocationB, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+		Sinon Si(Global.StatusB == Équipe 1);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("B"), Global.LocationB, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Bleu, Visibilité par défaut);
+		Sinon;
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("B"), Global.LocationB, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Rouge, Visibilité par défaut);
+		Fin;
+		Global.IconB = Dernier identifiant de texte;
+		Détruire du texte en jeu(Global.IconC);
+		Si(Global.StatusC == 0);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("C"), Global.LocationC, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+		Sinon Si(Global.StatusC == Équipe 1);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("C"), Global.LocationC, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Bleu, Visibilité par défaut);
+		Sinon;
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("C"), Global.LocationC, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Rouge, Visibilité par défaut);
+		Fin;
+		Global.IconC = Dernier identifiant de texte;
+	}
+}
+
+règle("HUD : Score")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{1} : {0} %", Global.ScoreTeam1, Équipe 1),
+			Chaîne personnalisée("Current Rate : {0} / {1} sec", Global.Team1ScoreRate, Global.ScoreTickRate), Non applicable, Gauche, 0,
+			Bleu, Bleu ciel, Blanc, Visible pour et Chaîne de texte, Toujours visible);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{1} : {0} %", Global.ScoreTeam2, Équipe 2),
+			Chaîne personnalisée("Current Rate : {0} / {1} sec", Global.Team2ScoreRate, Global.ScoreTickRate), Non applicable, Droite, 0,
+			Rouge, Orange, Blanc, Visible pour et Chaîne de texte, Toujours visible);
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Map settings : Lunar")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Colonie lunaire Horizon);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(5.304, 7.300, -98.030);
+		Global.LocationB = Vecteur(75.477, 8.300, -68.910);
+		Global.LocationC = Vecteur(44.540, 8.300, -14.920);
+	}
+}
+
+règle("Map settings : Havana")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(La Havane);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(36.059, 6.500, -58.734);
+		Global.LocationB = Vecteur(-10, 6.500, -70);
+		Global.LocationC = Vecteur(-60.045, 5, -45.245);
+	}
+}
+
+règle("Map settings : Kings Row")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		(Carte actuelle == Carte(King’s Row) || Carte actuelle == Carte(King's Row hiver)) == Vrai;
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(-73.204, 1.112, 1.912);
+		Global.LocationB = Vecteur(-33.240, 10.701, -13.374);
+		Global.LocationC = Vecteur(-4.213, 1.770, -33.260);
+	}
+}
+
+règle("Map settings : B.World")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		(Carte actuelle == Carte(Blizzard World) || Carte actuelle == Carte(Blizzard World hiver)) == Vrai;
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(-62.588, 2.047, 136.949);
+		Global.LocationB = Vecteur(-16.378, 3.213, 88.776);
+		Global.LocationC = Vecteur(22.542, 1.300, 34.218);
+	}
+}
+
+règle("Map settings : Hollywood")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		(Carte actuelle == Carte(Hollywood) || Carte actuelle == Carte(Hollywood Halloween)) == Vrai;
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(-3.393, 2.817, -91.886);
+		Global.LocationB = Vecteur(-18.062, 7.051, -12.079);
+		Global.LocationC = Vecteur(16.147, 7.300, 40.987);
+	}
+}
+
+règle("Map settings : Vloskaya")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Usine Volskaya);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(4.861, -1.820, 71.391);
+		Global.LocationB = Vecteur(-62.152, -2.680, 86.183);
+		Global.LocationC = Vecteur(-90.509, 3.320, 66.230);
+	}
+}
+
+règle("Map settings : Busan")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Busan);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(236.039, 10.395, 248.763);
+		Global.LocationB = Vecteur(208.332, 18.488, 211.276);
+		Global.LocationC = Vecteur(189.771, 13.395, 248.250);
+	}
+}
+
+règle("Map settings : Dorado")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Dorado);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(23.504, 5.300, -41.721);
+		Global.LocationB = Vecteur(64.643, 8.300, -7.953);
+		Global.LocationC = Vecteur(163.305, 12.150, 38.031);
+	}
+}
+
+règle("Map settings : Eichenwalde")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		(Carte actuelle == Carte(Eichenwalde) || Carte actuelle == Carte(Eichenwalde Halloween)) == Vrai;
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(11.624, 5.114, -32.372);
+		Global.LocationB = Vecteur(0.763, 5.846, -92.356);
+		Global.LocationC = Vecteur(58.627, 13.023, -75.199);
+	}
+}
+
+règle("Map settings : Hanamura")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		(Carte actuelle == Carte(Hanamura) || Carte actuelle == Carte(Hanamura hiver)) == Vrai;
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(40.578, 1.606, 35.579);
+		Global.LocationB = Vecteur(-18.608, 0.034, -16.642);
+		Global.LocationC = Vecteur(34.352, 4.300, -81.442);
+	}
+}
+
+règle("Map settings : Junkertown")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Junkertown);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(8.250, 8.303, -43.076);
+		Global.LocationB = Vecteur(-40.746, 5.966, -64.582);
+		Global.LocationC = Vecteur(-68.382, 13.731, -97.223);
+	}
+}
+
+règle("Map settings : Numbani")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Numbani);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(38.271, 0.355, 14.354);
+		Global.LocationB = Vecteur(74.610, 7.550, -11.209);
+		Global.LocationC = Vecteur(167.400, -2.303, 0.924);
+	}
+}
+
+règle("Map settings : Gibraltar")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Observatoire : Gibraltar);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(58.666, -4.857, -128.096);
+		Global.LocationB = Vecteur(5.740, -0.700, -106.946);
+		Global.LocationC = Vecteur(65.657, -1.827, -32.820);
+	}
+}
+
+règle("Map settings : Paris")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Paris);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(-13.817, 17.300, -60.289);
+		Global.LocationB = Vecteur(-40.481, 15.290, -10.332);
+		Global.LocationC = Vecteur(-85.758, 11.043, -25.738);
+	}
+}
+
+règle("Map settings : Road 66")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Route 66);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(67.643, 1.273, 21.408);
+		Global.LocationB = Vecteur(15.158, 3.397, -8.953);
+		Global.LocationC = Vecteur(-63.592, 7.800, 14.037);
+	}
+}
+
+règle("Map settings : Anubis")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Temple d’Anubis);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(-5.896, 3.809, 45.247);
+		Global.LocationB = Vecteur(-50.413, 10.809, 29.839);
+		Global.LocationC = Vecteur(-23.224, 2.810, 63.938);
+	}
+}
+
+désactivé règle("Map settings : ???")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Busan);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(236.039, 10.395, 248.763);
+		Global.LocationB = Vecteur(208.332, 18.488, 211.276);
+		Global.LocationC = Vecteur(189.771, 13.395, 248.250);
+	}
+}
+
+règle("Generate Point Aeras effects")
+{
+	évènement
+	{
+		Sous-programme;
+		CircleUpdate;
+	}
+
+	actions
+	{
+		Détruire un effet(Global.CircleA);
+		Si(Global.StatusA == 0);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.LocationA, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon Si(Global.StatusA == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Bleu, Global.LocationA, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Rouge, Global.LocationA, Global.Radius,
+				Visible pour Position et Rayon);
+		Fin;
+		Global.CircleA = Dernière entité créée;
+		Détruire un effet(Global.CircleB);
+		Si(Global.StatusB == 0);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.LocationB, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon Si(Global.StatusB == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Bleu, Global.LocationB, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Rouge, Global.LocationB, Global.Radius,
+				Visible pour Position et Rayon);
+		Fin;
+		Global.CircleB = Dernière entité créée;
+		Détruire un effet(Global.CircleC);
+		Si(Global.StatusC == 0);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.LocationC, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon Si(Global.StatusC == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Bleu, Global.LocationC, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Rouge, Global.LocationC, Global.Radius,
+				Visible pour Position et Rayon);
+		Fin;
+		Global.CircleC = Dernière entité créée;
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Point A, Team 1 : a player is in and no team 2 player is in")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 1;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Joueur exécutant, Global.LocationA) <= Global.Radius) == Vrai;
+		(Distance entre(Global.LocationA, Joueur le plus proche de(Global.LocationA, Équipe 2)) > Global.Radius) == Vrai;
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Si(Global.StatusA != Équipe de(Joueur exécutant));
+			Global.StatusA = Équipe de(Joueur exécutant);
+		Sinon Si(Global.StatusA == 0);
+			Global.StatusA = Équipe de(Joueur exécutant);
+		Fin;
+		Sous-programme à appeler(InnerEffectA);
+		Sous-programme à appeler(ScoreUpdate);
+		Sous-programme à appeler(IconUpdate);
+		Sous-programme à appeler(CircleUpdate);
+	}
+}
+
+règle("Point A, Team 2 : a player is in and no team 1 player is in")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Joueur exécutant, Global.LocationA) <= Global.Radius) == Vrai;
+		(Distance entre(Global.LocationA, Joueur le plus proche de(Global.LocationA, Équipe 1)) > Global.Radius) == Vrai;
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Si(Global.StatusA != Équipe de(Joueur exécutant));
+			Global.StatusA = Équipe de(Joueur exécutant);
+		Sinon Si(Global.StatusA == 0);
+			Global.StatusA = Équipe de(Joueur exécutant);
+		Fin;
+		Sous-programme à appeler(InnerEffectA);
+		Sous-programme à appeler(ScoreUpdate);
+		Sous-programme à appeler(IconUpdate);
+		Sous-programme à appeler(CircleUpdate);
+	}
+}
+
+règle("Point A : Update Owner Sphere for location A")
+{
+	évènement
+	{
+		Sous-programme;
+		InnerEffectA;
+	}
+
+	actions
+	{
+		Détruire un effet(Global.EffectA);
+		Si(Global.StatusA == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Nuage, Bleu, Global.LocationA, 4, Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Nuage, Rouge, Global.LocationA, 4, Visible pour Position et Rayon);
+		Fin;
+		Global.EffectA = Dernière entité créée;
+	}
+}
+
+règle("Point B, Team 1 : a player is in and no team 2 player is in")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 1;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Joueur exécutant, Global.LocationB) <= Global.Radius) == Vrai;
+		(Distance entre(Global.LocationB, Joueur le plus proche de(Global.LocationB, Équipe 2)) > Global.Radius) == Vrai;
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Si(Global.StatusB != Équipe de(Joueur exécutant));
+			Global.StatusB = Équipe de(Joueur exécutant);
+		Sinon Si(Global.StatusB == 0);
+			Global.StatusB = Équipe de(Joueur exécutant);
+		Fin;
+		Sous-programme à appeler(InnerEffectB);
+		Sous-programme à appeler(ScoreUpdate);
+		Sous-programme à appeler(IconUpdate);
+		Sous-programme à appeler(CircleUpdate);
+	}
+}
+
+règle("Point B, Team 2 : a player is in and no team 1 player is in")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Joueur exécutant, Global.LocationB) <= Global.Radius) == Vrai;
+		(Distance entre(Global.LocationB, Joueur le plus proche de(Global.LocationB, Équipe 1)) > Global.Radius) == Vrai;
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Si(Global.StatusB != Équipe de(Joueur exécutant));
+			Global.StatusB = Équipe de(Joueur exécutant);
+		Sinon Si(Global.StatusB == 0);
+			Global.StatusB = Équipe de(Joueur exécutant);
+		Fin;
+		Sous-programme à appeler(InnerEffectB);
+		Sous-programme à appeler(ScoreUpdate);
+		Sous-programme à appeler(IconUpdate);
+		Sous-programme à appeler(CircleUpdate);
+	}
+}
+
+règle("Point B : Update Owner Sphere for location B")
+{
+	évènement
+	{
+		Sous-programme;
+		InnerEffectB;
+	}
+
+	actions
+	{
+		Détruire un effet(Global.EffectB);
+		Si(Global.StatusB == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Nuage, Bleu, Global.LocationB, 4, Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Nuage, Rouge, Global.LocationB, 4, Visible pour Position et Rayon);
+		Fin;
+		Global.EffectB = Dernière entité créée;
+	}
+}
+
+règle("Point C, Team 1 : a player is in and no team 2 player is in")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 1;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Joueur exécutant, Global.LocationC) <= Global.Radius) == Vrai;
+		(Distance entre(Global.LocationC, Joueur le plus proche de(Global.LocationC, Équipe 2)) > Global.Radius) == Vrai;
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Si(Global.StatusC != Équipe de(Joueur exécutant));
+			Global.StatusC = Équipe de(Joueur exécutant);
+		Sinon Si(Global.StatusB == 0);
+			Global.StatusC = Équipe de(Joueur exécutant);
+		Fin;
+		Sous-programme à appeler(InnerEffectC);
+		Sous-programme à appeler(ScoreUpdate);
+		Sous-programme à appeler(IconUpdate);
+		Sous-programme à appeler(CircleUpdate);
+	}
+}
+
+règle("Point C, Team 2 : a player is in and no team 1 player is in")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Joueur exécutant, Global.LocationC) <= 6) == Vrai;
+		(Distance entre(Global.LocationC, Joueur le plus proche de(Global.LocationC, Équipe 1)) > 6) == Vrai;
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Si(Global.StatusC != Équipe de(Joueur exécutant));
+			Global.StatusC = Équipe de(Joueur exécutant);
+		Sinon Si(Global.StatusC == 0);
+			Global.StatusC = Équipe de(Joueur exécutant);
+		Fin;
+		Sous-programme à appeler(InnerEffectC);
+		Sous-programme à appeler(ScoreUpdate);
+		Sous-programme à appeler(IconUpdate);
+		Sous-programme à appeler(CircleUpdate);
+	}
+}
+
+règle("Point C : Update Owner Sphere for location C")
+{
+	évènement
+	{
+		Sous-programme;
+		InnerEffectC;
+	}
+
+	actions
+	{
+		Détruire un effet(Global.EffectC);
+		Si(Global.StatusC == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Nuage, Bleu, Global.LocationC, 4, Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Nuage, Rouge, Global.LocationC, 4, Visible pour Position et Rayon);
+		Fin;
+		Global.EffectC = Dernière entité créée;
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("WIN : Victory Team 1")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		(Global.ScoreTeam1 >= 100) == Vrai;
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Déclarer la victoire d’une équipe(Équipe 1);
+	}
+}
+
+règle("WIN : Victory Team 2")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		(Global.ScoreTeam2 >= 100) == Vrai;
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Déclarer la victoire d’une équipe(Équipe 2);
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Scores program")
+{
+	évènement
+	{
+		Sous-programme;
+		ScoreUpdate;
+	}
+
+	actions
+	{
+		Modifier une variable globale selon une cadence(ScoreTeam1, (Global.StatusA == Équipe 1 ? Global.ScoreTickValue : 0) + (
+			Global.StatusB == Équipe 1 ? Global.ScoreTickValue : 0) + (Global.StatusC == Équipe 1 ? Global.ScoreTickValue : 0)
+			+ Global.ScoreTeam1, Global.ScoreTickRate, Destination et Taux);
+		Global.Team1ScoreRate = (Global.StatusA == Équipe 1 ? Global.ScoreTickValue : 0) + (
+			Global.StatusB == Équipe 1 ? Global.ScoreTickValue : 0) + (Global.StatusC == Équipe 1 ? Global.ScoreTickValue : 0);
+		Modifier une variable globale selon une cadence(ScoreTeam2, (Global.StatusA == Équipe 2 ? Global.ScoreTickValue : 0) + (
+			Global.StatusB == Équipe 2 ? Global.ScoreTickValue : 0) + (Global.StatusC == Équipe 2 ? Global.ScoreTickValue : 0)
+			+ Global.ScoreTeam2, Global.ScoreTickRate, Destination et Taux);
+		Global.Team2ScoreRate = (Global.StatusA == Équipe 2 ? Global.ScoreTickValue : 0) + (
+			Global.StatusB == Équipe 2 ? Global.ScoreTickValue : 0) + (Global.StatusC == Équipe 2 ? Global.ScoreTickValue : 0);
+	}
+}
+
+règle("Dispawn management")
+{
+	évènement
+	{
+		Un joueur meurt;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.LocationA) <= Global.Radius || Distance entre(Joueur exécutant, Global.LocationB)
+			<= Global.Radius || Distance entre(Joueur exécutant, Global.LocationC) <= Global.Radius);
+			Réapparaître(Joueur exécutant);
+			Attente(0.500, Ignorer la condition);
+			Tuer(Joueur exécutant, Non applicable);
+			Attente(5, Ignorer la condition);
+			Réapparaître(Joueur exécutant);
+		Fin;
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Sombra : invisibility management")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Héros de(Joueur exécutant) == Héros(Sombra);
+		Capacité 1 utilisée(Joueur exécutant) == Vrai;
+		(Distance entre(Joueur exécutant, Global.LocationA) <= Global.Radius || Distance entre(Joueur exécutant, Global.LocationB)
+			<= Global.Radius || Distance entre(Joueur exécutant, Global.LocationC) <= Global.Radius) == Vrai;
+		Global.GameStatus == Vrai;
+	}
+
+	actions
+	{
+		Infliger des dégâts(Joueur exécutant, Non applicable, 1);
+		Soigner(Joueur exécutant, Non applicable, 1);
+		Message en grand(Joueur exécutant, Chaîne personnalisée("You are now VISIBLE"));
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("By Lix#2563")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Attente(20, Ignorer la condition);
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Made by Lix#2563"));
+	}
+}
