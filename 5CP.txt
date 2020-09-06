@@ -1,0 +1,1193 @@
+variables
+{
+	globale:
+		0: PointA
+		1: PointB
+		2: PointC
+		3: PointD
+		4: PointE
+		5: StatusA
+		6: StatusB
+		7: StatusC
+		8: StatusD
+		9: StatusE
+		10: EffectA
+		11: EffectB
+		12: EffectC
+		13: EffectD
+		14: EffectE
+		15: AvailableDeactivation
+		16: PointTimer
+		18: Timer
+		19: FlagEntity
+		20: GameState
+		21: FlagOwner
+		22: FlagPosition
+		23: FlagStartPoint
+		25: Radius
+		26: AllyInA
+		27: AllyInB
+		28: AllyInC
+		29: AllyInD
+		30: AllyInE
+		31: LetterA
+		32: LetterB
+		33: LetterC
+		34: LetterD
+		35: LetterE
+
+	de joueur:
+		0: CanTakeTheFlag
+		1: MessageIdentifier
+}
+
+sous-programmes
+{
+	0: DropTheFlag
+	1: UpdatePoints
+	2: UpdateProgression
+	3: UpdatePositionLetters
+}
+
+règle("main rule")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Désactiver le calcul des points prédéfini par le mode de jeu;
+		Désactiver l’interface du mode de jeu(Tous les joueurs(Toutes les équipes));
+		Désactiver l’interface en jeu du mode de jeu(Tous les joueurs(Toutes les équipes));
+		Désactiver l’accomplissement prédéfini par le mode de jeu;
+		Désactiver l’annonceur prédéfini par le mode de jeu;
+		Désactiver la musique prédéfinie par le mode de jeu;
+		Définir la description d’objectif(Tous les joueurs(Équipe 2), Chaîne personnalisée("Drop the Flag on the last point !"),
+			Visible pour et Chaîne de texte);
+	}
+}
+
+règle("main settings")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Global.Radius = 6;
+		Global.FlagOwner = Chaîne personnalisée("");
+		Global.StatusA = Toutes les équipes;
+		Global.StatusB = Toutes les équipes;
+		Global.StatusC = Toutes les équipes;
+		Global.StatusD = Toutes les équipes;
+		Global.StatusE = Toutes les équipes;
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("HUD common")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Point E : {0}", Global.StatusE),
+			Non applicable, Non applicable, Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Point D : {0}", Global.StatusD),
+			Non applicable, Non applicable, Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Point C : {0}", Global.StatusC),
+			Non applicable, Non applicable, Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Point B : {0}", Global.StatusB),
+			Non applicable, Non applicable, Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Point A : {0}", Global.StatusA),
+			Non applicable, Non applicable, Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Joueur hôte, Chaîne personnalisée("Ally E : {0}", Global.AllyInE), Non applicable, Non applicable,
+			Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Joueur hôte, Chaîne personnalisée("Ally D : {0}", Global.AllyInD), Non applicable, Non applicable,
+			Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Joueur hôte, Chaîne personnalisée("Ally C : {0}", Global.AllyInC), Non applicable, Non applicable,
+			Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Joueur hôte, Chaîne personnalisée("Ally B : {0}", Global.AllyInB), Non applicable, Non applicable,
+			Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Joueur hôte, Chaîne personnalisée("Ally A : {0}", Global.AllyInA), Non applicable, Non applicable,
+			Droite, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+règle("HUD Team 1")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 1;
+		Tout;
+	}
+
+	conditions
+	{
+		désactivé Global.AvailableDeactivation >= 1;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("You can deactivate {0} points.",
+			Global.AvailableDeactivation), Chaîne personnalisée("Press {0} inside a point to deactivate it.", Bouton(Sauter)),
+			Non applicable, Haut, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Starting Game")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Sous-programme à appeler(UpdatePoints);
+		Global.GameState = Faux;
+		Forcer la position du joueur(Tous les joueurs(Équipe 2), Global.FlagStartPoint, Vrai);
+		Définir le temps de jeu(30);
+		Attente(30, Ignorer la condition);
+		Global.GameState = Vrai;
+		Téléportation(Tous les joueurs(Équipe 2), Global.FlagStartPoint);
+		Arrêter de forcer la position du joueur(Tous les joueurs(Équipe 2));
+		Définir le temps de jeu(900);
+		Attente(900, Ignorer la condition);
+		Déclarer la victoire d’une équipe(Équipe 1);
+	}
+}
+
+règle("Build Flag")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Créer un effet(Tous les joueurs(Toutes les équipes), Orbe, Vert, Global.FlagPosition, 1, Visible pour Position et Rayon);
+		Global.FlagEntity = Dernière entité créée;
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Activate TakeTheFlag")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.FlagPosition, Joueur exécutant) <= 3) == Vrai;
+		Global.GameState == Vrai;
+		Contenu du tableau(Tous les héros de soutien, Héros de(Joueur exécutant)) == Vrai;
+	}
+
+	actions
+	{
+		Joueur exécutant.CanTakeTheFlag = Vrai;
+		Créer du texte d’interface(Joueur exécutant, Chaîne personnalisée("Press {0} to take the Flag", Bouton(Mêlée)), Non applicable,
+			Non applicable, Gauche, 0, Blanc, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Joueur exécutant.MessageIdentifier = Dernier identifiant de texte;
+	}
+}
+
+règle("Deactivate TakeTheFlag")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.FlagPosition, Joueur exécutant) > 3) == Vrai;
+		Global.GameState == Vrai;
+		Contenu du tableau(Tous les héros de soutien, Héros de(Joueur exécutant)) == Vrai;
+	}
+
+	actions
+	{
+		Détruire du texte d’interface(Joueur exécutant.MessageIdentifier);
+		Joueur exécutant.CanTakeTheFlag = Faux;
+	}
+}
+
+règle("Request to take the Flag")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.FlagPosition, Joueur exécutant) <= 3) == Vrai;
+		Global.GameState == Vrai;
+		Bouton maintenu enfoncé(Joueur exécutant, Mêlée) == Vrai;
+		Global.FlagOwner == Chaîne personnalisée("");
+		Contenu du tableau(Tous les héros de soutien, Héros de(Joueur exécutant)) == Vrai;
+	}
+
+	actions
+	{
+		Détruire du texte d’interface(Joueur exécutant.MessageIdentifier);
+		Global.FlagOwner = Joueur exécutant;
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("To drop the Flag, press {0}", Bouton(
+			Interaction)), Chaîne personnalisée("You can't drop the flag in a point"), Non applicable, Gauche, 0, Blanc, Blanc, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+		Joueur exécutant.MessageIdentifier = Dernier identifiant de texte;
+		Tant que(Global.FlagOwner == Joueur exécutant);
+			Global.FlagPosition = Position de(Joueur exécutant);
+			Attente(0.250, Ignorer la condition);
+		Fin;
+		Désactiver la collision des mouvements avec les joueurs(Joueur exécutant);
+		Si(Distance entre(Joueur exécutant, Global.PointA) <= Global.Radius);
+			Global.AllyInA = Global.AllyInA - 1;
+		Fin;
+		Si(Distance entre(Joueur exécutant, Global.PointB) <= Global.Radius);
+			Global.AllyInB = Global.AllyInB - 1;
+		Fin;
+		Si(Distance entre(Joueur exécutant, Global.PointC) <= Global.Radius);
+			Global.AllyInC = Global.AllyInC - 1;
+		Fin;
+		Si(Distance entre(Joueur exécutant, Global.PointD) <= Global.Radius);
+			Global.AllyInD = Global.AllyInD - 1;
+		Fin;
+		Si(Distance entre(Joueur exécutant, Global.PointE) <= Global.Radius);
+			Global.AllyInE = Global.AllyInE - 1;
+		Fin;
+	}
+}
+
+règle("Request to Drop The Flag")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Global.GameState == Vrai;
+		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+		Global.FlagOwner == Joueur exécutant;
+		désactivé Contenu du tableau(Tous les héros de soutien, Héros de(Joueur exécutant)) == Vrai;
+		(Distance entre(Joueur exécutant, Global.PointA) > Global.Radius && Distance entre(Joueur exécutant, Global.PointB)
+			> Global.Radius && Distance entre(Joueur exécutant, Global.PointC) > Global.Radius && Distance entre(Joueur exécutant,
+			Global.PointD) > Global.Radius && Distance entre(Joueur exécutant, Global.PointE) > Global.Radius) == Vrai;
+	}
+
+	actions
+	{
+		Sous-programme à appeler(DropTheFlag);
+	}
+}
+
+règle("Die with Flag")
+{
+	évènement
+	{
+		Un joueur meurt;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Global.FlagOwner == Joueur exécutant;
+	}
+
+	actions
+	{
+		Sous-programme à appeler(DropTheFlag);
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("The Flag owner died"));
+	}
+}
+
+règle("Is Flag dropped for too long")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.FlagOwner == Chaîne personnalisée("");
+		Global.GameState == Vrai;
+		Global.FlagPosition != Global.FlagStartPoint;
+	}
+
+	actions
+	{
+		Attente(1, Ignorer la condition);
+		Global.Timer = 10;
+		Tant que(Global.FlagOwner == Chaîne personnalisée("") && Global.Timer != 0);
+			Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Flag will return in {0}", Global.Timer));
+			Jouer un effet(Tous les joueurs(Équipe 2), Son d’impact d’affaiblissement, Violet, Tous les joueurs(Équipe 2), 100);
+			Attente(1, Ignorer la condition);
+			Global.Timer = Global.Timer - 1;
+		Fin;
+		Si(Global.FlagOwner == Chaîne personnalisée("") && Global.Timer == 0);
+			Global.FlagPosition = Global.FlagStartPoint;
+		Fin;
+		Jouer un effet(Tous les joueurs(Équipe 2), Son de l’explosion, Violet, Tous les joueurs(Équipe 2), 100);
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Request to unlock Point A")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointA, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner == Joueur exécutant;
+		Distance entre(Joueur le plus proche de(Global.PointA, Équipe 1), Global.PointA) > Global.Radius;
+		Global.StatusA == Toutes les équipes;
+		Global.AllyInA == Vrai;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Global.PointTimer = 5;
+		Pour variable globale(PointTimer, 5, 0, -1);
+			Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Loading point A : {0}", Global.PointTimer));
+			Attente(1, Ignorer la condition);
+			Interrompre si la condition est fausse;
+		Fin;
+		Global.StatusA = Équipe 2;
+		Sous-programme à appeler(UpdatePoints);
+		Sous-programme à appeler(UpdateProgression);
+	}
+}
+
+règle("Request to unlock Point B")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointB, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner == Joueur exécutant;
+		Distance entre(Joueur le plus proche de(Global.PointB, Équipe 1), Global.PointB) > Global.Radius;
+		Global.StatusB == Toutes les équipes;
+		Global.AllyInB == Vrai;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Global.PointTimer = 5;
+		Pour variable globale(PointTimer, 5, 0, -1);
+			Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Loading point B : {0}", Global.PointTimer));
+			Attente(1, Ignorer la condition);
+			Interrompre si la condition est fausse;
+		Fin;
+		Global.StatusB = Équipe 2;
+		Sous-programme à appeler(UpdatePoints);
+		Sous-programme à appeler(UpdateProgression);
+	}
+}
+
+règle("Request to unlock Point C")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointC, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner == Joueur exécutant;
+		Distance entre(Joueur le plus proche de(Global.PointC, Équipe 1), Global.PointC) > Global.Radius;
+		Global.StatusC == Toutes les équipes;
+		Global.AllyInC == Vrai;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Global.PointTimer = 5;
+		Pour variable globale(PointTimer, 5, 0, -1);
+			Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Loading point C : {0}", Global.PointTimer));
+			Attente(1, Ignorer la condition);
+			Interrompre si la condition est fausse;
+		Fin;
+		Global.StatusC = Équipe 2;
+		Sous-programme à appeler(UpdatePoints);
+		Sous-programme à appeler(UpdateProgression);
+	}
+}
+
+règle("Request to unlock Point D")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointD, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner == Joueur exécutant;
+		Distance entre(Joueur le plus proche de(Global.PointD, Équipe 1), Global.PointD) > Global.Radius;
+		Global.StatusD == Toutes les équipes;
+		Global.AllyInD == Vrai;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Global.PointTimer = 5;
+		Pour variable globale(PointTimer, 5, 0, -1);
+			Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Loading point D : {0}", Global.PointTimer));
+			Attente(1, Ignorer la condition);
+			Interrompre si la condition est fausse;
+		Fin;
+		Global.StatusD = Équipe 2;
+		Sous-programme à appeler(UpdatePoints);
+		Sous-programme à appeler(UpdateProgression);
+	}
+}
+
+règle("Request to unlock Point E")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointE, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner == Joueur exécutant;
+		Distance entre(Joueur le plus proche de(Global.PointE, Équipe 1), Global.PointE) > Global.Radius;
+		Global.StatusE == Toutes les équipes;
+		Global.AllyInE == Vrai;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Global.PointTimer = 5;
+		Pour variable globale(PointTimer, 5, 0, -1);
+			Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Loading point E : {0}", Global.PointTimer));
+			Attente(1, Ignorer la condition);
+			Interrompre si la condition est fausse;
+		Fin;
+		Global.StatusE = Équipe 2;
+		Sous-programme à appeler(UpdatePoints);
+		Sous-programme à appeler(UpdateProgression);
+	}
+}
+
+règle("Team Kill of Team 2 = +1 point allowed to be deactivated")
+{
+	évènement
+	{
+		Un joueur meurt;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Nombre de joueurs morts(Équipe 2) >= Nombre de joueurs(Équipe 2);
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Global.AvailableDeactivation = Global.AvailableDeactivation + 1;
+	}
+}
+
+règle("Team 1 player Deactivate a point")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 1;
+		Tout;
+	}
+
+	conditions
+	{
+		Global.AvailableDeactivation >= 1;
+		Bouton maintenu enfoncé(Joueur exécutant, Sauter) == Vrai;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointA) <= Global.Radius);
+			Global.StatusA = Équipe 1;
+			Global.AvailableDeactivation = Global.AvailableDeactivation - 1;
+		Sinon Si(Distance entre(Joueur exécutant, Global.PointB) <= Global.Radius);
+			Global.StatusB = Équipe 1;
+			Global.AvailableDeactivation = Global.AvailableDeactivation - 1;
+		Sinon Si(Distance entre(Joueur exécutant, Global.PointC) <= Global.Radius);
+			Global.StatusC = Équipe 1;
+			Global.AvailableDeactivation = Global.AvailableDeactivation - 1;
+		Sinon Si(Distance entre(Joueur exécutant, Global.PointD) <= Global.Radius);
+			Global.StatusD = Équipe 1;
+			Global.AvailableDeactivation = Global.AvailableDeactivation - 1;
+		Sinon Si(Distance entre(Joueur exécutant, Global.PointE) <= Global.Radius);
+			Global.StatusE = Équipe 1;
+			Global.AvailableDeactivation = Global.AvailableDeactivation - 1;
+		Fin;
+		Sous-programme à appeler(UpdatePoints);
+		Sous-programme à appeler(UpdateProgression);
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Sub : Drop the Flag")
+{
+	évènement
+	{
+		Sous-programme;
+		DropTheFlag;
+	}
+
+	actions
+	{
+		Détruire du texte d’interface(Joueur exécutant.MessageIdentifier);
+		Global.FlagOwner = Chaîne personnalisée("");
+		Global.FlagPosition = Vecteur(Composante X de(Position de(Joueur exécutant)), Composante Y de(Position de(Joueur exécutant)),
+			Composante Z de(Position de(Joueur exécutant)));
+		Joueur exécutant.MessageIdentifier = Dernier identifiant de texte;
+		Activer la collision des mouvements avec les joueurs(Joueur exécutant);
+		Si(Distance entre(Joueur exécutant, Global.PointA) <= Global.Radius);
+			désactivé Global.AllyInA = Global.AllyInA - 1;
+		Sinon;
+			Global.AllyInA = Global.AllyInA + 1;
+		Fin;
+		Si(Distance entre(Joueur exécutant, Global.PointB) <= Global.Radius);
+			désactivé Global.AllyInB = Global.AllyInB - 1;
+		Sinon;
+			Global.AllyInB = Global.AllyInB + 1;
+		Fin;
+		Si(Distance entre(Joueur exécutant, Global.PointC) <= Global.Radius);
+			désactivé Global.AllyInC = Global.AllyInC - 1;
+		Sinon;
+			Global.AllyInC = Global.AllyInC + 1;
+		Fin;
+		Si(Distance entre(Joueur exécutant, Global.PointD) <= Global.Radius);
+			désactivé Global.AllyInD = Global.AllyInD - 1;
+		Sinon;
+			Global.AllyInD = Global.AllyInD + 1;
+		Fin;
+		Si(Distance entre(Joueur exécutant, Global.PointE) <= Global.Radius);
+			désactivé Global.AllyInE = Global.AllyInE - 1;
+		Sinon;
+			Global.AllyInE = Global.AllyInE + 1;
+		Fin;
+	}
+}
+
+règle("Sub : UpdatePoints")
+{
+	évènement
+	{
+		Sous-programme;
+		UpdatePoints;
+	}
+
+	actions
+	{
+		Détruire un effet(Global.EffectA);
+		Si(Global.StatusA == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Équipe 1, Global.PointA, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon Si(Global.StatusA == Équipe 2);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Puits de lumière, Équipe 2, Global.PointA, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.PointA, Global.Radius, Visible pour Position et Rayon);
+		Fin;
+		Global.EffectA = Dernière entité créée;
+		Détruire un effet(Global.EffectB);
+		Si(Global.StatusB == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Équipe 1, Global.PointB, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon Si(Global.StatusB == Équipe 2);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Puits de lumière, Équipe 2, Global.PointB, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.PointB, Global.Radius, Visible pour Position et Rayon);
+		Fin;
+		Global.EffectB = Dernière entité créée;
+		Détruire un effet(Global.EffectC);
+		Si(Global.StatusC == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Équipe 1, Global.PointC, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon Si(Global.StatusC == Équipe 2);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Puits de lumière, Équipe 2, Global.PointC, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.PointC, Global.Radius, Visible pour Position et Rayon);
+		Fin;
+		Global.EffectC = Dernière entité créée;
+		Détruire un effet(Global.EffectD);
+		Si(Global.StatusD == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Équipe 1, Global.PointD, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon Si(Global.StatusD == Équipe 2);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Puits de lumière, Équipe 2, Global.PointD, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.PointD, Global.Radius, Visible pour Position et Rayon);
+		Fin;
+		Global.EffectD = Dernière entité créée;
+		Détruire un effet(Global.EffectE);
+		Si(Global.StatusE == Équipe 1);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Équipe 1, Global.PointE, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon Si(Global.StatusE == Équipe 2);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Puits de lumière, Équipe 2, Global.PointE, Global.Radius,
+				Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.PointE, Global.Radius, Visible pour Position et Rayon);
+		Fin;
+		Global.EffectE = Dernière entité créée;
+		Sous-programme à appeler(UpdatePositionLetters);
+	}
+}
+
+règle("Sub : Update Players Spawn And FlagStartPosition")
+{
+	évènement
+	{
+		Sous-programme;
+		UpdateProgression;
+	}
+
+	actions
+	{
+		Si(Global.StatusE == Équipe 2);
+			Déclarer la victoire d’une équipe(Équipe 2);
+		Sinon Si(Global.StatusD == Équipe 2);
+			Global.FlagStartPoint = Global.PointD;
+			Forcer une salle d’apparition(Toutes les équipes, 2);
+		Sinon Si(Global.StatusC == Équipe 2);
+			Global.FlagStartPoint = Global.PointC;
+			Forcer une salle d’apparition(Toutes les équipes, 1);
+		Sinon Si(Global.StatusB == Équipe 2);
+			Forcer une salle d’apparition(Toutes les équipes, 1);
+			Global.FlagStartPoint = Global.PointB;
+		Sinon Si(Global.StatusA == Équipe 2);
+			Forcer une salle d’apparition(Toutes les équipes, 0);
+			Global.FlagStartPoint = Global.PointA;
+		Fin;
+		Si(Global.StatusE == Équipe 1);
+			Déclarer la victoire d’une équipe(Équipe 1);
+		Fin;
+	}
+}
+
+règle("Sub : Letter of points")
+{
+	évènement
+	{
+		Sous-programme;
+		UpdatePositionLetters;
+	}
+
+	actions
+	{
+		Détruire un effet(Global.LetterA);
+		Si(Global.StatusA == Équipe 1);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("A"), Global.PointA, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 1, Visibilité par défaut);
+		Sinon Si(Global.StatusA == Équipe 2);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("A"), Global.PointA, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 2, Visibilité par défaut);
+		Sinon;
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("A"), Global.PointA, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+		Fin;
+		Global.LetterA = Dernière entité créée;
+		Détruire un effet(Global.LetterB);
+		Si(Global.StatusB == Équipe 1);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("B"), Global.PointB, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 1, Visibilité par défaut);
+		Sinon Si(Global.StatusB == Équipe 2);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("B"), Global.PointB, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 2, Visibilité par défaut);
+		Sinon;
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("B"), Global.PointB, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+		Fin;
+		Global.LetterB = Dernière entité créée;
+		Détruire un effet(Global.LetterC);
+		Si(Global.StatusC == Équipe 1);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("C"), Global.PointC, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 1, Visibilité par défaut);
+		Sinon Si(Global.StatusC == Équipe 2);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("C"), Global.PointC, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 2, Visibilité par défaut);
+		Sinon;
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("C"), Global.PointC, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+		Fin;
+		Global.LetterC = Dernière entité créée;
+		Détruire un effet(Global.LetterD);
+		Si(Global.StatusD == Équipe 1);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("D"), Global.PointD, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 1, Visibilité par défaut);
+		Sinon Si(Global.StatusD == Équipe 2);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("D"), Global.PointD, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 2, Visibilité par défaut);
+		Sinon;
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("D"), Global.PointD, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+		Fin;
+		Global.LetterD = Dernière entité créée;
+		Détruire un effet(Global.LetterE);
+		Si(Global.StatusE == Équipe 1);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("E"), Global.PointE, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 1, Visibilité par défaut);
+		Sinon Si(Global.StatusE == Équipe 2);
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("E"), Global.PointE, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Équipe 2, Visibilité par défaut);
+		Sinon;
+			Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("E"), Global.PointE, 10, Ne pas masquer,
+				Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+		Fin;
+		Global.LetterE = Dernière entité créée;
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Positions for Eichenwalde")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Eichenwalde);
+	}
+
+	actions
+	{
+		Global.PointA = Vecteur(12.959, 5.488, -40.215);
+		Global.PointB = Vecteur(0.567, 5.669, -90.200);
+		Global.PointC = Vecteur(59.440, 12.289, -94.531);
+		Global.PointD = Vecteur(90.817, 14.023, -56.742);
+		Global.PointE = Vecteur(122.990, 10.021, -28.279);
+		Global.FlagStartPoint = Vecteur(-13.498, 2.300, 3.020);
+		Global.FlagPosition = Global.FlagStartPoint;
+	}
+}
+
+règle("Is a non flag owner out of a point A ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointA, Position de(Joueur exécutant)) > Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointA) > Global.Radius);
+			Global.AllyInA = Global.AllyInA - 1;
+		Fin;
+	}
+}
+
+règle("Is a non flag owner out of a point B ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointB, Position de(Joueur exécutant)) > Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointB) > Global.Radius);
+			Global.AllyInB = Global.AllyInB - 1;
+		Fin;
+	}
+}
+
+règle("Is a non flag owner out of a point C ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointC, Position de(Joueur exécutant)) > Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointC) > Global.Radius);
+			Global.AllyInC = Global.AllyInC - 1;
+		Fin;
+	}
+}
+
+règle("Is a non flag owner out of a point D ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointD, Position de(Joueur exécutant)) > Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointD) > Global.Radius);
+			Global.AllyInD = Global.AllyInD - 1;
+		Fin;
+	}
+}
+
+règle("Is a non flag owner out of a point E ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointE, Position de(Joueur exécutant)) > Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointE) > Global.Radius);
+			Global.AllyInE = Global.AllyInE - 1;
+		Fin;
+	}
+}
+
+règle("Is a non flag owner in a point A ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointA, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointA) <= Global.Radius);
+			Global.AllyInA = 1 + Global.AllyInA;
+		Fin;
+	}
+}
+
+règle("Is a non flag owner in a point B ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointB, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointB) <= Global.Radius);
+			Global.AllyInB = 1 + Global.AllyInB;
+		Fin;
+	}
+}
+
+règle("Is a non flag owner in a point C ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointC, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointC) <= Global.Radius);
+			Global.AllyInC = 1 + Global.AllyInC;
+		Fin;
+	}
+}
+
+règle("Is a non flag owner in a point D ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointD, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointD) <= Global.Radius);
+			Global.AllyInD = 1 + Global.AllyInD;
+		Fin;
+	}
+}
+
+règle("Is a non flag owner in a point E ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Global.PointE, Position de(Joueur exécutant)) <= Global.Radius) == Vrai;
+		Global.FlagOwner != Joueur exécutant;
+		Global.GameState == Vrai;
+	}
+
+	actions
+	{
+		Si(Distance entre(Joueur exécutant, Global.PointE) <= Global.Radius);
+			Global.AllyInE = 1 + Global.AllyInE;
+		Fin;
+	}
+}
+
+règle("Manage new team 2 player")
+{
+	évènement
+	{
+		Un joueur a rejoint la partie;
+		Équipe 2;
+		Tout;
+	}
+
+	actions
+	{
+		Global.AllyInA = 1 + Global.AllyInA;
+		Global.AllyInB = 1 + Global.AllyInB;
+		Global.AllyInC = 1 + Global.AllyInC;
+		Global.AllyInD = 1 + Global.AllyInD;
+		Global.AllyInE = 1 + Global.AllyInE;
+	}
+}
+
+règle("Manager leaver team 2")
+{
+	évènement
+	{
+		Un joueur a quitté la partie;
+		Équipe 2;
+		Tout;
+	}
+
+	actions
+	{
+		Global.AllyInA = 1 + Global.AllyInA;
+		Global.AllyInB = 1 + Global.AllyInB;
+		Global.AllyInC = 1 + Global.AllyInC;
+		Global.AllyInD = 1 + Global.AllyInD;
+		Global.AllyInE = 1 + Global.AllyInE;
+	}
+}
+
+désactivé règle("dummy AI creation")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Bouton maintenu enfoncé(Joueur exécutant, S’accroupir) == Vrai;
+	}
+
+	actions
+	{
+		Créer une I.A.(Héros(Ana), Équipe 2, 1, Joueur exécutant, Vecteur(0, 0, 0));
+		Attacher les joueurs(Dernière entité créée, Joueur exécutant, Vecteur(0, 0, 4));
+	}
+}
+
+désactivé règle("dummy AI deletion")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Bouton maintenu enfoncé(Joueur exécutant, Rechargement) == Vrai;
+	}
+
+	actions
+	{
+		Détruire toutes les I.A.;
+	}
+}
