@@ -1,0 +1,335 @@
+variables
+{
+	globale:
+		0: Cat
+		1: NewCat
+		2: RatePerSecond
+		3: PrevCat
+
+	de joueur:
+		0: MyAura
+}
+
+sous-programmes
+{
+	0: SelectCat
+}
+
+règle("By Lix#2563")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Game settings")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Définir la description d’objectif(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Cats and mices"),
+			Visible pour et Chaîne de texte);
+		Désactiver le calcul des points prédéfini par le mode de jeu;
+		désactivé Désactiver l’interface du mode de jeu(Tous les joueurs(Toutes les équipes));
+		désactivé Désactiver l’interface en jeu du mode de jeu(Tous les joueurs(Toutes les équipes));
+		Désactiver l’accomplissement prédéfini par le mode de jeu;
+		Désactiver l’annonceur prédéfini par le mode de jeu;
+		Désactiver la réapparition prédéfinie par le mode de jeu(Tous les joueurs(Toutes les équipes));
+		Activer l’écran des scores(Tous les joueurs(Toutes les équipes));
+		Global.RatePerSecond = 50;
+	}
+}
+
+règle("Game Settings 2")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Désactiver le calcul des points prédéfini par le mode de jeu;
+		désactivé Désactiver l’interface du mode de jeu(Joueur exécutant);
+		désactivé Désactiver l’interface en jeu du mode de jeu(Joueur exécutant);
+		Désactiver l’accomplissement prédéfini par le mode de jeu;
+		Désactiver l’annonceur prédéfini par le mode de jeu;
+		Désactiver la réapparition prédéfinie par le mode de jeu(Joueur exécutant);
+		Activer l’écran des scores(Joueur exécutant);
+		Interdire le bouton(Joueur exécutant, Tir principal);
+		Interdire le bouton(Joueur exécutant, Tir secondaire);
+		Définir les dégâts infligés(Joueur exécutant, 1);
+	}
+}
+
+désactivé règle("Manuel trigger of Select a cat")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Bouton maintenu enfoncé(Joueur hôte, S’accroupir) == Vrai;
+	}
+
+	actions
+	{
+		Sous-programme à appeler(SelectCat);
+	}
+}
+
+règle("Create Auras")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Global.NewCat == Vrai;
+	}
+
+	actions
+	{
+		Détruire un effet(Joueur exécutant.MyAura);
+		Attente(1, Ignorer la condition);
+		Si(Joueur exécutant == Global.Cat);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Mauvaise aura, Rouge, Joueur exécutant, 0.500,
+				Visible pour Position et Rayon);
+		Sinon Si(Joueur exécutant == Global.PrevCat);
+			Créer un effet(Tous les joueurs(Toutes les équipes), Bonne aura, Blanc, Joueur exécutant, 1, Visible pour Position et Rayon);
+		Sinon Si(Mort(Joueur exécutant));
+			Créer un effet(Tous les joueurs(Toutes les équipes), Etincelles, Violet, Joueur exécutant, 1, Visible pour Position et Rayon);
+		Sinon;
+			Créer un effet(Tous les joueurs(Toutes les équipes), Nuage, Citron vert, Joueur exécutant, 0.500, Visible pour Position et Rayon);
+		Fin;
+		Joueur exécutant.MyAura = Dernière entité créée;
+		Global.NewCat = Faux;
+	}
+}
+
+règle("HUD")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("The Current Cat is {0}", Global.Cat),
+			Non applicable, Non applicable, Gauche, 0, Blanc, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Current Cat HP : {0} / {1} ", Points de vie(
+			Global.Cat), Points de vie maximum(Global.Cat)), Non applicable, Non applicable, Gauche, 0, Blanc, Blanc, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
+			"{0} is immune until the next cat is touched", Global.PrevCat), Non applicable, Non applicable, Droite, 0, Blanc, Blanc, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+règle("Cat")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant == Global.Cat;
+	}
+
+	actions
+	{
+		Infliger des dégâts sur la durée(Joueur exécutant, Non applicable, 9999, Points de vie maximum(Joueur exécutant)
+			/ Global.RatePerSecond);
+		Autoriser un bouton(Joueur exécutant, Mêlée);
+		Définir la vitesse de déplacement(Joueur exécutant, 110);
+	}
+}
+
+règle("Mices")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant != Global.Cat;
+	}
+
+	actions
+	{
+		Arrêter tous les dégâts sur la durée(Joueur exécutant);
+		Interdire le bouton(Joueur exécutant, Mêlée);
+		Définir la vitesse de déplacement(Joueur exécutant, 100);
+		Forcer le contour des joueurs(Tous les joueurs(Toutes les équipes), Tous les joueurs(Toutes les équipes), Vrai, Citron vert);
+	}
+}
+
+règle("Mice is knocked by cat")
+{
+	évènement
+	{
+		Un joueur subit des dégâts;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant != Global.Cat;
+		Joueur exécutant != Global.PrevCat;
+	}
+
+	actions
+	{
+		Si(Nombre de joueurs en vie(Toutes les équipes) > 2);
+			Global.PrevCat = Global.Cat;
+		Sinon;
+			Global.PrevCat = Chaîne personnalisée("");
+		Fin;
+		Global.Cat = Joueur exécutant;
+		Global.NewCat = Vrai;
+	}
+}
+
+règle("Player die")
+{
+	évènement
+	{
+		Un joueur meurt;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Nombre de joueurs en vie(Toutes les équipes) > 1;
+	}
+
+	actions
+	{
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0} is out", Joueur exécutant));
+		Sous-programme à appeler(SelectCat);
+		Définir la vitesse des projectiles(Joueur exécutant, 100);
+	}
+}
+
+règle("Sub : SelectCat")
+{
+	évènement
+	{
+		Sous-programme;
+		SelectCat;
+	}
+
+	actions
+	{
+		Global.Cat = Valeur aléatoire dans le tableau(Tous les joueurs en vie(Toutes les équipes));
+		Global.PrevCat = Chaîne personnalisée("");
+		Global.NewCat = Vrai;
+	}
+}
+
+règle("Win round")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Nombre de joueurs en vie(Toutes les équipes) == 1;
+	}
+
+	actions
+	{
+		Modifier le score d’un joueur(Tous les joueurs en vie(Toutes les équipes), 1);
+		Tuer(Tous les joueurs en vie(Toutes les équipes), Non applicable);
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0} win the round", Premier de(
+			Tous les joueurs en vie(Toutes les équipes))));
+		Attente(3, Ignorer la condition);
+		Réapparaître(Tous les joueurs morts(Toutes les équipes));
+		Attente(3, Ignorer la condition);
+		Sous-programme à appeler(SelectCat);
+	}
+}
+
+règle("Win game")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Score de(Joueur exécutant) == 3;
+	}
+
+	actions
+	{
+		Déclarer la victoire d’un joueur(Joueur exécutant);
+	}
+}
+
+règle("Game Start")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		Sous-programme à appeler(SelectCat);
+	}
+}
+
+règle("Game duration")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		Définir le temps de jeu(600);
+	}
+}
