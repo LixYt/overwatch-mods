@@ -1,0 +1,540 @@
+variables
+{
+	globale:
+		0: MainHunter
+		1: NbHunter
+
+	de joueur:
+		0: IsHunter
+		1: StatusEffect
+		2: Trap
+		3: TrapText
+		4: CanTrap
+}
+
+sous-programmes
+{
+	0: DefineHunter
+	1: CreateAI
+}
+
+règle("Game settings (player side)")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Interdire le bouton(Joueur exécutant, Tir principal);
+		Interdire le bouton(Joueur exécutant, Tir secondaire);
+		Interdire le bouton(Joueur exécutant, Mêlée);
+		Joueur exécutant.Trap = 0;
+	}
+}
+
+règle("Game settings (game side)")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Définir la description d’objectif(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Fox and Chickens"),
+			Visible pour et Chaîne de texte);
+		Désactiver le calcul des points prédéfini par le mode de jeu;
+		Désactiver l’interface du mode de jeu(Tous les joueurs(Toutes les équipes));
+		Désactiver l’interface en jeu du mode de jeu(Tous les joueurs(Toutes les équipes));
+		Désactiver l’accomplissement prédéfini par le mode de jeu;
+		Désactiver l’annonceur prédéfini par le mode de jeu;
+		Désactiver la musique prédéfinie par le mode de jeu;
+		Désactiver la réapparition prédéfinie par le mode de jeu(Tous les joueurs(Toutes les équipes));
+		Définir les dégâts infligés(Tous les joueurs(Toutes les équipes), 0);
+		Global.NbHunter = 0;
+	}
+}
+
+règle("By Lix#2563")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Made by Lix#2563"));
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Capture the points to win !"));
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Vicotry of Hunters")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.NbHunter == Nombre de joueurs(Toutes les équipes);
+		Partie en cours == Vrai;
+		Nombre de joueurs(Toutes les équipes) >= 3;
+	}
+
+	actions
+	{
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Hunters Wins"));
+		désactivé Déclarer la victoire d’un joueur(Global.MainHunter);
+		Définir le temps de jeu(0);
+		Déclarer la victoire d’un joueur(Global.MainHunter);
+	}
+}
+
+règle("Timer ends : chickens wins")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Temps total écoulé == Vrai;
+		Global.NbHunter != Nombre de joueurs(Toutes les équipes);
+	}
+
+	actions
+	{
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Chikens Wins"));
+	}
+}
+
+règle("Game Start")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		désactivé Sous-programme à appeler(CreateAI);
+		Sous-programme à appeler(DefineHunter);
+	}
+}
+
+règle("Game starts only with 2 or more players")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Faux;
+		Nombre de joueurs(Toutes les équipes) <= 2;
+	}
+
+	actions
+	{
+		Mettre en pause le temps de jeu;
+	}
+}
+
+règle("Game préparation resume when 2 or more player are in")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Faux;
+		Nombre de joueurs(Toutes les équipes) > 1;
+	}
+
+	actions
+	{
+		Reprendre le temps de jeu;
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Draw lines")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Bon rayon, Vecteur(20, 0.400, 16), Vecteur(-20, 0.400, 16),
+			Bleu ciel, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Bon rayon, Vecteur(20, 0.400, -16), Vecteur(-20, 0.400, -16),
+			Bleu ciel, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Bon rayon, Vecteur(20, 3, 16), Vecteur(-20, 3, 16), Bleu ciel,
+			Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Bon rayon, Vecteur(20, 3, -16), Vecteur(-20, 3, -16), Bleu ciel,
+			Visible pour Position et Rayon);
+	}
+}
+
+règle("Sub : Select a hunter")
+{
+	évènement
+	{
+		Sous-programme;
+		DefineHunter;
+	}
+
+	actions
+	{
+		Global.MainHunter = Valeur aléatoire dans le tableau(Tous les joueurs(Toutes les équipes));
+		Global.MainHunter.IsHunter = Vrai;
+	}
+}
+
+règle("In Safe Zone")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		(Composante Z de(Position de(Joueur exécutant)) >= 16 || Composante Z de(Position de(Joueur exécutant)) <= -16) == Vrai;
+		Joueur exécutant.IsHunter == Faux;
+	}
+
+	actions
+	{
+		Détruire un effet(Joueur exécutant.StatusEffect);
+		Créer une icône(Tous les joueurs(Toutes les équipes), Joueur exécutant, Smiley content, Visible pour et Position, Vert, Vrai);
+		Joueur exécutant.StatusEffect = Dernière entité créée;
+		Pour variable de joueur(Joueur exécutant, O, 10, 0, -1);
+			Message en petit(Joueur exécutant, Chaîne personnalisée("You have {0} second to go out !", Joueur exécutant.O));
+			Attente(1, Ignorer la condition);
+			Interrompre si la condition est fausse;
+		Fin;
+		Interrompre si la condition est fausse;
+		Jouer un effet(Tous les joueurs(Toutes les équipes), Mauvais effet de ramassage, Violet, Joueur exécutant, 2);
+		Téléportation(Joueur exécutant, Vecteur(Composante X de(Position de(Joueur exécutant)), 2, Composante Z de(Position de(
+			Joueur exécutant)) + (Composante Z de(Position de(Joueur exécutant)) >= 16 ? -10 : 10)));
+		Définir la vitesse de déplacement(Joueur exécutant, 75);
+		Attente(2, Ignorer la condition);
+		Définir la vitesse de déplacement(Joueur exécutant, 100);
+	}
+}
+
+règle("Not in Safe Zone")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant.IsHunter == Faux;
+		(Composante Z de(Position de(Joueur exécutant)) < 16 && Composante Z de(Position de(Joueur exécutant)) > -16) == Vrai;
+	}
+
+	actions
+	{
+		Détruire un effet(Joueur exécutant.StatusEffect);
+		Créer une icône(Tous les joueurs(Toutes les équipes), Joueur exécutant, Flèche bas, Visible pour et Position, Jaune, Vrai);
+		Joueur exécutant.StatusEffect = Dernière entité créée;
+	}
+}
+
+règle("is Hunter")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant.IsHunter == Vrai;
+	}
+
+	actions
+	{
+		Global.NbHunter += 1;
+		Détruire un effet(Joueur exécutant.StatusEffect);
+		Créer une icône(Tous les joueurs(Toutes les équipes), Joueur exécutant, Flamme, Visible pour et Position, Rouge, Vrai);
+		Joueur exécutant.StatusEffect = Dernière entité créée;
+		Définir les dégâts infligés(Tous les joueurs(Toutes les équipes), 1);
+		Autoriser un bouton(Joueur exécutant, Mêlée);
+	}
+}
+
+règle("Fox hits Chicken")
+{
+	évènement
+	{
+		Un joueur subit des dégâts;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant.IsHunter == Faux;
+		Composante Z de(Position de(Joueur exécutant)) < 16;
+		Composante Z de(Position de(Joueur exécutant)) > -16;
+	}
+
+	actions
+	{
+		Joueur exécutant.IsHunter = Vrai;
+		Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0}", Position de(Joueur exécutant)));
+	}
+}
+
+règle("Fox try to go in safe zone")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant.IsHunter == Vrai;
+		(Composante Z de(Position de(Joueur exécutant)) >= 16 || Composante Z de(Position de(Joueur exécutant)) <= -16) == Vrai;
+	}
+
+	actions
+	{
+		Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Fox can't go in safe zone"));
+		Téléportation(Joueur exécutant, Vecteur(Composante X de(Position de(Joueur exécutant)), Composante Y de(Position de(
+			Joueur exécutant)), Composante Z de(Position de(Joueur exécutant)) >= 16 ? 15 : -15));
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+désactivé règle("create AI")
+{
+	évènement
+	{
+		Sous-programme;
+		CreateAI;
+	}
+
+	actions
+	{
+		Créer une I.A.(Héros(Soldat : 76), Toutes les équipes, -1, Vecteur(2, 0, 2), Vecteur(0, 0, 0));
+		Créer une I.A.(Héros(Tracer), Toutes les équipes, -1, Vecteur(4, 0, -18), Vecteur(0, 0, 0));
+		Créer une I.A.(Héros(Moira), Toutes les équipes, -1, Vecteur(8, 0, -5), Vecteur(0, 0, 0));
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("HUD : personal")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Joueur exécutant, Chaîne personnalisée("You are {0}", Joueur exécutant.IsHunter ? Chaîne personnalisée(
+			"a Hunter") : Chaîne personnalisée("a Chicken")), Non applicable, Non applicable, Gauche, 0, Blanc, Blanc, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+désactivé règle("HUD : Host")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Joueur exécutant, Chaîne personnalisée("{0}", Position de(Joueur exécutant)), Non applicable,
+			Non applicable, Droite, 0, Blanc, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+règle("HUD : common")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0} Hunters / {1} Players", Global.NbHunter,
+			Nombre de joueurs(Toutes les équipes)), Non applicable, Non applicable, Droite, 0, Blanc, Blanc, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+règle("HUD : trap available")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+		Joueur exécutant.IsHunter == Vrai;
+		Joueur exécutant.Trap == 0;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
+			"A Trap is available. Press {0} to drop in on you position.", Bouton(Interaction)), Non applicable, Non applicable, Droite, 0,
+			Blanc, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Joueur exécutant.TrapText = Dernier identifiant de texte;
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Fox create a Tarp")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+		Joueur exécutant.IsHunter == Vrai;
+		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+		Joueur exécutant.CanTrap == Vrai;
+	}
+
+	actions
+	{
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Blanc, Joueur exécutant, 2, Visible pour Position et Rayon);
+		Joueur exécutant.Trap = Dernière entité créée;
+		Détruire du texte d’interface(Joueur exécutant.TrapText);
+		Joueur exécutant.CanTrap = Faux;
+	}
+}
+
+règle("Is a player in a Trap ?")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Distance entre(Joueur le plus proche de(Joueur exécutant.Trap, Toutes les équipes), Joueur exécutant.Trap) <= 2;
+		Joueur exécutant.IsHunter == Faux;
+	}
+
+	actions
+	{
+		Message en grand(Joueur exécutant, Chaîne personnalisée("A Chicken is in your trap"));
+		Forcer la position du joueur(Joueur le plus proche de(Joueur exécutant.Trap, Toutes les équipes), Joueur exécutant.Trap, Vrai);
+		Attente(3, Ignorer la condition);
+		Arrêter de forcer la position du joueur(Joueur le plus proche de(Joueur exécutant.Trap, Toutes les équipes));
+		Attente(30, Ignorer la condition);
+		Joueur exécutant.Trap = 0;
+	}
+}
+
+règle("Can Fox set a trap")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+		Temps de jeu <= 120;
+		Joueur exécutant.IsHunter == Vrai;
+	}
+
+	actions
+	{
+		Joueur exécutant.CanTrap = Vrai;
+	}
+}
