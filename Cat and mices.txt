@@ -1,3 +1,71 @@
+paramètres
+{
+	modes
+	{
+		Combat à mort
+		{
+			Réapparition active: Désactivé
+			Score à atteindre pour gagner: 50
+
+			cartes activées
+			{
+				Nécropole
+			}
+		}
+
+		Général
+		{
+			Apparition des kits de soins: Désactivé
+			Derniers instants: Désactivé
+			Début de la partie: Immédiatement
+			Journal d’action: Désactivé
+			Limite de héros: Désactivé
+		}
+	}
+
+	héros
+	{
+		Général
+		{
+			Capacité ultime: Désactivé
+			Temps de recharge de la capacité: 500%
+			Tir principal: Désactivé
+
+			Bouldozer
+			{
+				Temps de recharge de Griffe-crampon: 70%
+			}
+
+			Lúcio
+			{
+				Soins prodigués: 30%
+				Soins reçus: 50%
+			}
+
+			Moira
+			{
+				Maximum de soins d’Orbe biotique: 50%
+			}
+
+			Pharah
+			{
+				Temps de recharge de Réacteurs: 350%
+			}
+
+			Soldat : 76
+			{
+				Soins reçus: 65%
+			}
+
+			héros désactivés
+			{
+				Ana
+				Sombra
+			}
+		}
+	}
+}
+
 variables
 {
 	globale:
@@ -5,14 +73,23 @@ variables
 		1: NewCat
 		2: RatePerSecond
 		3: PrevCat
+		4: SafeLocationA
+		5: SafeLocationB
+		6: SafeLocationC
+		7: ZoneSafeState
+		8: SafeEffectA
+		9: SafeEffectB
+		10: SafeEffectC
 
 	de joueur:
 		0: MyAura
+		1: SafeTimer
 }
 
 sous-programmes
 {
 	0: SelectCat
+	1: CreateSafeZoneEffect
 }
 
 règle("By Lix#2563")
@@ -234,6 +311,9 @@ règle("Player die")
 		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0} is out", Joueur exécutant));
 		Sous-programme à appeler(SelectCat);
 		Définir la vitesse des projectiles(Joueur exécutant, 100);
+		Réinitialiser la disponibilité du héros pour un joueur(Joueur exécutant);
+		Lancer la caméra(Global.Cat, Position des yeux(Global.Cat), Vecteur local de(Regard en direction de(Global.Cat), Global.Cat,
+			Rotation), 0);
 	}
 }
 
@@ -313,6 +393,142 @@ règle("Game Start")
 	actions
 	{
 		Sous-programme à appeler(SelectCat);
+	}
+}
+
+désactivé règle("Sub : Create Safe zones")
+{
+	évènement
+	{
+		Sous-programme;
+		CreateSafeZoneEffect;
+	}
+
+	actions
+	{
+		Créer un effet(Tous les joueurs(Toutes les équipes), Puits de lumière, Bleu ciel, Global.SafeLocationA, 2,
+			Visible pour Position et Rayon);
+		Global.SafeEffectA = Dernière entité créée;
+		Créer un effet(Tous les joueurs(Toutes les équipes), Puits de lumière, Bleu ciel, Global.SafeLocationB, 2,
+			Visible pour Position et Rayon);
+		Global.SafeEffectB = Dernière entité créée;
+		Créer un effet(Tous les joueurs(Toutes les équipes), Puits de lumière, Bleu ciel, Global.SafeLocationC, 2,
+			Visible pour Position et Rayon);
+		Global.SafeEffectC = Dernière entité créée;
+	}
+}
+
+désactivé règle("Safe zone of Necropolis")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Nécropole);
+	}
+
+	actions
+	{
+		Global.SafeLocationA = Vecteur(3.554, 11.289, 23.323);
+		Global.SafeLocationB = Vecteur(4.105, 11.289, -23.038);
+		Global.SafeLocationC = Vecteur(-28.323, 10.251, 0.687);
+	}
+}
+
+désactivé règle("In Safe zone")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Distance entre(Global.SafeLocationA, Joueur exécutant) <= 2;
+		Nombre de joueurs en vie(Toutes les équipes) > 3;
+		Global.ZoneSafeState == Vrai;
+	}
+
+	actions
+	{
+		Définir les dégâts subis(Joueur exécutant, 0);
+		Définir l’invisibilité(Joueur exécutant, Tous);
+		Pour variable de joueur(Joueur exécutant, SafeTimer, 7, 0, -1);
+			Message en petit(Joueur exécutant, Chaîne personnalisée("You are gonna be bumped out in ... {0}", Joueur exécutant.SafeTimer));
+			Attente(1, Interrompre quand faux);
+		Fin;
+		Interrompre si la condition est fausse;
+		Appliquer une impulsion(Joueur exécutant, Vecteur(Nombre entier aléatoire(-5, 5), 20, Nombre entier aléatoire(-5, 5)), 20,
+			Au joueur, Annuler le mouvement contraire);
+	}
+}
+
+désactivé règle("Out of safe zone")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Distance entre(Global.SafeLocationA, Joueur exécutant) > 2;
+	}
+
+	actions
+	{
+		Définir l’invisibilité(Joueur exécutant, Aucune);
+		Définir les dégâts subis(Joueur exécutant, 1);
+	}
+}
+
+désactivé règle("SafeZone On")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Arrondir à l’entier(Temps total écoulé / 10, Au plus près) % 3 == Vrai;
+		Nombre de joueurs en vie(Toutes les équipes) > 3;
+	}
+
+	actions
+	{
+		Global.ZoneSafeState = Vrai;
+		Sous-programme à appeler(CreateSafeZoneEffect);
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Safe Zone activated"));
+	}
+}
+
+désactivé règle("SafeZone Off")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Arrondir à l’entier(Temps total écoulé / 10, Au plus près) % 3 == Faux;
+	}
+
+	actions
+	{
+		Global.ZoneSafeState = Faux;
+		Détruire un effet(Global.SafeEffectA);
+		Détruire un effet(Global.SafeEffectB);
+		Détruire un effet(Global.SafeEffectC);
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Safe Zone deactivated"));
 	}
 }
 

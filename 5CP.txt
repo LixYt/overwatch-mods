@@ -1,3 +1,37 @@
+paramètres
+{
+	salon
+	{
+		Autoriser les joueurs en file d’attente: Oui
+		Équilibrage des équipes: Après la revanche
+	}
+
+	modes
+	{
+		désactivé Capture du drapeau
+		{
+			Capacités du porteur de drapeau: Aucune
+			Durée de ramassage du drapeau: 10
+			Temps de réapparition du drapeau après capture: 00
+		}
+
+		Échauffement
+		{
+			cartes activées
+			{
+				Eichenwalde
+			}
+		}
+
+		Général
+		{
+			Apparition des kits de soins: Activé
+			Début de la partie: Immédiatement
+			Limite de rôles: 2 de chaque par équipe
+		}
+	}
+}
+
 variables
 {
 	globale:

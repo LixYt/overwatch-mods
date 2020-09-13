@@ -1,3 +1,39 @@
+paramètres
+{
+	modes
+	{
+		Combat à mort
+		{
+			Réapparition active: Désactivé
+			Score à atteindre pour gagner: 50
+
+			cartes activées
+			{
+				Nécropole
+			}
+		}
+
+		Général
+		{
+			Apparition des kits de soins: Désactivé
+			Derniers instants: Désactivé
+			Début de la partie: Immédiatement
+			Journal d’action: Désactivé
+			Limite de héros: Désactivé
+		}
+	}
+
+	héros
+	{
+		Général
+		{
+			Capacité ultime: Désactivé
+			Temps de recharge de la capacité: 500%
+			Tir principal: Désactivé
+		}
+	}
+}
+
 variables
 {
 	globale:

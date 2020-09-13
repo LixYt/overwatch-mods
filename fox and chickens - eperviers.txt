@@ -1,3 +1,45 @@
+paramètres
+{
+	modes
+	{
+		Combat à mort
+		{
+			Durée de la partie en minutes: 5
+
+			cartes activées
+			{
+				Salle de la Forge
+			}
+		}
+
+		Général
+		{
+			Changement de héros: Désactivé
+			Début de la partie: Immédiatement
+			Limite de héros: Désactivé
+			Réapparition en héros aléatoire: Activé
+		}
+	}
+
+	héros
+	{
+		Général
+		{
+			héros activés
+			{
+				Ashe
+				D.Va
+				Doomfist
+				Genji
+				Hanzo
+				Moira
+				Soldat : 76
+				Tracer
+			}
+		}
+	}
+}
+
 variables
 {
 	globale:
@@ -113,7 +155,7 @@ règle("Timer ends : chickens wins")
 
 	conditions
 	{
-		Temps total écoulé == Vrai;
+		Temps de jeu == 0;
 		Global.NbHunter != Nombre de joueurs(Toutes les équipes);
 	}
 
@@ -432,7 +474,7 @@ règle("HUD : common")
 	}
 }
 
-règle("HUD : trap available")
+désactivé règle("HUD : trap available")
 {
 	évènement
 	{
@@ -465,7 +507,7 @@ règle("")
 	}
 }
 
-règle("Fox create a Tarp")
+désactivé règle("Fox create a Tarp")
 {
 	évènement
 	{
@@ -491,7 +533,7 @@ règle("Fox create a Tarp")
 	}
 }
 
-règle("Is a player in a Trap ?")
+désactivé règle("Is a player in a Trap ?")
 {
 	évènement
 	{
@@ -517,7 +559,7 @@ règle("Is a player in a Trap ?")
 	}
 }
 
-règle("Can Fox set a trap")
+désactivé règle("Can Fox set a trap")
 {
 	évènement
 	{

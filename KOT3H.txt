@@ -1,3 +1,27 @@
+paramètres
+{
+	principal
+	{
+		Description: "King Of The 3 Hills is a mode where you need to capture 3 points in ordre to laod faster your team gauge. First team at 100% wins. Made by Lix#2563"
+	}
+
+	modes
+	{
+		Échauffement
+		{
+			cartes activées
+			{
+				Colonie lunaire Horizon
+			}
+		}
+
+		Général
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+	}
+}
+
 variables
 {
 	globale:
