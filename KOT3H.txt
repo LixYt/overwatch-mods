@@ -1,32 +1,3 @@
-paramètres
-{
-	modes
-	{
-		Échauffement
-		{
-			cartes désactivées
-			{
-				Étendue de la Forge
-				Étendue de la Forge Nuit
-				Ilios
-				Île de la Forge
-				Île de la Forge Nuit
-				Népal
-				Oasis
-				Rialto
-				Salle de la Forge
-				Tour de Lijiang
-				Tour de Lijiang nouvel an lunaire
-			}
-		}
-
-		Général
-		{
-			Limite de rôles: 2 de chaque par équipe
-		}
-	}
-}
-
 variables
 {
 	globale:
@@ -45,12 +16,15 @@ variables
 		12: Team2ScoreRate
 		13: GameStatus
 		14: Radius
+		15: JumperRadius
 		16: IconA
 		17: IconB
 		18: IconC
 		19: CircleA
 		20: CircleB
 		21: CircleC
+		22: JumperA
+		23: JumperB
 		24: ScoreTeam1
 		25: ScoreTeam2
 }
@@ -63,6 +37,31 @@ sous-programmes
 	3: ScoreUpdate
 	4: IconUpdate
 	5: CircleUpdate
+}
+
+règle("By Lix#2563")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+}
+
+règle("Preparation periode. Player management")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Forcer la position du joueur(Joueur exécutant, Position de(Joueur exécutant), Vrai);
+		Attente(29, Ignorer la condition);
+		Arrêter de forcer la position du joueur(Joueur exécutant);
+	}
 }
 
 règle("Preparation periode")
@@ -78,24 +77,12 @@ règle("Preparation periode")
 			"Kings of The 3 Hills (KoT3H) : Prepare your team !"), Visible pour et Chaîne de texte);
 		Global.GameStatus = Faux;
 		Définir le temps de jeu(30);
-		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Prepare your team !"));
 		Attente(30, Ignorer la condition);
-		Tuer(Tous les joueurs(Toutes les équipes), Non applicable);
-		Définir le temps de jeu(900);
+		Global.GameStatus = Vrai;
+		Définir le temps de jeu(600);
 		Définir la description d’objectif(Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
 			"Kings of The 3 Hills (KoT3H) : Attack the 3 points to increase your gauge faster than the other team."),
 			Visible pour et Chaîne de texte);
-		Global.GameStatus = Vrai;
-		Réapparaître(Tous les joueurs(Toutes les équipes));
-		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Go ! Go ! Go !"));
-	}
-}
-
-règle("")
-{
-	évènement
-	{
-		Toute la partie - Tout le monde;
 	}
 }
 
@@ -125,6 +112,16 @@ règle("Game settings (score parameters, point radius, mode settings, init...)")
 		Global.StatusC = 0;
 		Sous-programme à appeler(IconUpdate);
 		Sous-programme à appeler(CircleUpdate);
+		Global.JumperA = 0;
+		Global.JumperB = 0;
+	}
+}
+
+règle("")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
 	}
 }
 
@@ -140,11 +137,11 @@ règle("HUD : personal HUD")
 	actions
 	{
 		Si(Équipe de(Joueur exécutant) == Équipe 1);
-			Créer du texte d’interface(Tous les joueurs(Équipe 1), Chaîne personnalisée("Your team is : {0}", Équipe de(Joueur exécutant)),
-				Non applicable, Non applicable, Haut, 0, Bleu, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+			Créer du texte d’interface(Joueur exécutant, Chaîne personnalisée("Your team is : {0}", Équipe de(Joueur exécutant)),
+				Non applicable, Non applicable, Haut, 0, Équipe 1, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
 		Sinon;
-			Créer du texte d’interface(Tous les joueurs(Équipe 2), Chaîne personnalisée("Your team is : {0}", Équipe de(Joueur exécutant)),
-				Non applicable, Non applicable, Haut, 0, Rouge, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+			Créer du texte d’interface(Joueur exécutant, Chaîne personnalisée("Your team is : {0}", Équipe de(Joueur exécutant)),
+				Non applicable, Non applicable, Haut, 0, Équipe 2, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
 		Fin;
 	}
 }
@@ -207,12 +204,18 @@ règle("HUD : Score")
 
 	actions
 	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Score difference : {0} %",
+			Global.ScoreTeam1 - Global.ScoreTeam2, Équipe 1), Chaîne personnalisée("", Global.Team1ScoreRate, Global.ScoreTickRate),
+			Non applicable, Gauche, 0, Équipe 1, Équipe 1, Équipe 1, Visible pour et Chaîne de texte, Toujours visible);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Score difference {0} %",
+			Global.ScoreTeam2 - Global.ScoreTeam1, Équipe 2), Chaîne personnalisée("", Global.Team2ScoreRate, Global.ScoreTickRate),
+			Non applicable, Droite, 0, Équipe 2, Équipe 2, Équipe 2, Visible pour et Chaîne de texte, Toujours visible);
 		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{1} : {0} %", Global.ScoreTeam1, Équipe 1),
 			Chaîne personnalisée("Current Rate : {0} / {1} sec", Global.Team1ScoreRate, Global.ScoreTickRate), Non applicable, Gauche, 0,
-			Bleu, Bleu ciel, Blanc, Visible pour et Chaîne de texte, Toujours visible);
+			Équipe 1, Équipe 1, Équipe 1, Visible pour et Chaîne de texte, Toujours visible);
 		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{1} : {0} %", Global.ScoreTeam2, Équipe 2),
 			Chaîne personnalisée("Current Rate : {0} / {1} sec", Global.Team2ScoreRate, Global.ScoreTickRate), Non applicable, Droite, 0,
-			Rouge, Orange, Blanc, Visible pour et Chaîne de texte, Toujours visible);
+			Équipe 2, Équipe 2, Équipe 2, Visible pour et Chaîne de texte, Toujours visible);
 	}
 }
 
@@ -241,6 +244,9 @@ règle("Map settings : Lunar")
 		Global.LocationA = Vecteur(5.304, 7.300, -98.030);
 		Global.LocationB = Vecteur(75.477, 8.300, -68.910);
 		Global.LocationC = Vecteur(44.540, 8.300, -14.920);
+		Global.JumperA = Vecteur(51.231, 8.839, -28.705);
+		Global.JumperB = Vecteur(78.063, 11.250, -85.526);
+		Global.JumperRadius = 2;
 	}
 }
 
@@ -281,6 +287,9 @@ règle("Map settings : Kings Row")
 		Global.LocationA = Vecteur(-73.204, 1.112, 1.912);
 		Global.LocationB = Vecteur(-33.240, 10.701, -13.374);
 		Global.LocationC = Vecteur(-4.213, 1.770, -33.260);
+		Global.JumperA = Vecteur(-27.160, 1.388, -40.345);
+		Global.JumperB = Vecteur(-34.311, 10.250, -34.409);
+		Global.JumperRadius = 2;
 	}
 }
 
@@ -869,7 +878,7 @@ règle("")
 	}
 }
 
-règle("WIN : Victory Team 1")
+règle("EndGame : Victory Team 1")
 {
 	évènement
 	{
@@ -888,7 +897,7 @@ règle("WIN : Victory Team 1")
 	}
 }
 
-règle("WIN : Victory Team 2")
+règle("EndGame : Victory Team 2")
 {
 	évènement
 	{
@@ -907,6 +916,53 @@ règle("WIN : Victory Team 2")
 	}
 }
 
+règle("EndGame : Draw by equiality at 100%")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		(Global.ScoreTeam1 >= 100) == Vrai;
+		Global.GameStatus == Vrai;
+		(Global.ScoreTeam2 >= 100) == Vrai;
+	}
+
+	actions
+	{
+		Déclarer le match nul;
+	}
+}
+
+règle("EndGame : Timer Over (Higher score wins)")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		(Global.ScoreTeam1 < 100) == Vrai;
+		Global.GameStatus == Vrai;
+		(Global.ScoreTeam2 < 100) == Vrai;
+		Temps de jeu == 0;
+	}
+
+	actions
+	{
+		Si(Global.ScoreTeam1 > Global.ScoreTeam2);
+			Déclarer la victoire d’une équipe(Équipe 1);
+		Sinon Si(Global.ScoreTeam1 == Global.ScoreTeam2);
+			Déclarer le match nul;
+		Sinon;
+			Déclarer la victoire d’une équipe(Équipe 2);
+		Fin;
+	}
+}
+
 règle("")
 {
 	évènement
@@ -915,7 +971,7 @@ règle("")
 	}
 }
 
-règle("Scores program")
+règle("Sub : ScoreRateUpdate")
 {
 	évènement
 	{
@@ -956,11 +1012,13 @@ règle("Dispawn management")
 	{
 		Si(Distance entre(Joueur exécutant, Global.LocationA) <= Global.Radius || Distance entre(Joueur exécutant, Global.LocationB)
 			<= Global.Radius || Distance entre(Joueur exécutant, Global.LocationC) <= Global.Radius);
-			Réapparaître(Joueur exécutant);
-			Attente(0.500, Ignorer la condition);
-			Tuer(Joueur exécutant, Non applicable);
-			Attente(5, Ignorer la condition);
-			Réapparaître(Joueur exécutant);
+			Téléportation(Joueur exécutant, Vecteur(Composante X de(Joueur exécutant), Composante Y de(Joueur exécutant) + 30, Composante Z de(
+				Position de(Joueur exécutant))));
+			désactivé Réapparaître(Joueur exécutant);
+			désactivé Attente(0.500, Ignorer la condition);
+			désactivé Tuer(Joueur exécutant, Non applicable);
+			désactivé Attente(5, Ignorer la condition);
+			désactivé Réapparaître(Joueur exécutant);
 		Fin;
 	}
 }
@@ -1007,16 +1065,71 @@ règle("")
 	}
 }
 
-règle("By Lix#2563")
+règle("Jumper Instanciation")
 {
 	évènement
 	{
 		Toute la partie - Tout le monde;
 	}
 
+	conditions
+	{
+		Global.GameStatus == Vrai;
+		Global.JumperA != 0;
+		Global.JumperB != 0;
+	}
+
 	actions
 	{
-		Attente(20, Ignorer la condition);
-		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Made by Lix#2563"));
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Blanc, Global.JumperA, Global.JumperRadius,
+			Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Blanc, Global.JumperB, Global.JumperRadius,
+			Visible pour Position et Rayon);
+		Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Press {0} to Teleport", Bouton(Sauter)),
+			Global.JumperA, 2, Masquer derrière les surfaces, Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+		Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Press {0} to Teleport", Bouton(S’accroupir)),
+			Global.JumperB, 2, Masquer derrière les surfaces, Visible pour Position et Chaîne de texte, Blanc, Visibilité par défaut);
+	}
+}
+
+règle("Player use Jumper A")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Position de(Joueur exécutant), Global.JumperA) <= Global.JumperRadius) == Vrai;
+		Bouton maintenu enfoncé(Joueur exécutant, Sauter) == Vrai;
+	}
+
+	actions
+	{
+		Téléportation(Joueur exécutant, Global.JumperB);
+	}
+}
+
+règle("Player use Jumper B")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		(Distance entre(Position de(Joueur exécutant), Global.JumperB) <= Global.JumperRadius) == Vrai;
+		Bouton maintenu enfoncé(Joueur exécutant, S’accroupir) == Vrai;
+	}
+
+	actions
+	{
+		Téléportation(Joueur exécutant, Global.JumperA);
 	}
 }

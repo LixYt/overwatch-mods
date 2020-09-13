@@ -64,7 +64,7 @@ règle("main rule")
 		Désactiver l’accomplissement prédéfini par le mode de jeu;
 		Désactiver l’annonceur prédéfini par le mode de jeu;
 		Désactiver la musique prédéfinie par le mode de jeu;
-		Définir la description d’objectif(Tous les joueurs(Équipe 2), Chaîne personnalisée("Drop the Flag on the last point !"),
+		Définir la description d’objectif(Tous les joueurs(Équipe 2), Chaîne personnalisée("Drop the Flag on the last point (E) !"),
 			Visible pour et Chaîne de texte);
 	}
 }
@@ -144,9 +144,9 @@ règle("HUD Team 1")
 
 	actions
 	{
-		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("You can deactivate {0} points.",
-			Global.AvailableDeactivation), Chaîne personnalisée("Press {0} inside a point to deactivate it.", Bouton(Sauter)),
-			Non applicable, Haut, 0, Orange, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Joueur exécutant, Chaîne personnalisée("You can deactivate {0} points.", Global.AvailableDeactivation),
+			Chaîne personnalisée("Press {0} inside a point to deactivate it.", Bouton(Sauter)), Non applicable, Haut, 0, Orange, Blanc,
+			Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
 	}
 }
 
@@ -170,8 +170,8 @@ règle("Starting Game")
 		Sous-programme à appeler(UpdatePoints);
 		Global.GameState = Faux;
 		Forcer la position du joueur(Tous les joueurs(Équipe 2), Global.FlagStartPoint, Vrai);
-		Définir le temps de jeu(30);
-		Attente(30, Ignorer la condition);
+		Définir le temps de jeu(45);
+		Attente(45, Ignorer la condition);
 		Global.GameState = Vrai;
 		Téléportation(Tous les joueurs(Équipe 2), Global.FlagStartPoint);
 		Arrêter de forcer la position du joueur(Tous les joueurs(Équipe 2));
@@ -540,6 +540,8 @@ règle("Request to unlock Point E")
 		Global.StatusE == Toutes les équipes;
 		Global.AllyInE == Vrai;
 		Global.GameState == Vrai;
+		(Global.AllyInA == Vrai ? 1 : 0) + (Global.AllyInB == Vrai ? 1 : 0) + (Global.AllyInC == Vrai ? 1 : 0) + (
+			Global.AllyInD == Vrai ? 1 : 0) >= 2;
 	}
 
 	actions
@@ -1189,5 +1191,21 @@ désactivé règle("dummy AI deletion")
 	actions
 	{
 		Détruire toutes les I.A.;
+	}
+}
+
+règle("quick fix")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Définir la description d’objectif(Joueur exécutant, Chaîne personnalisée("Drop the Flag on the last point (E) !"),
+			Visible pour et Chaîne de texte);
 	}
 }
