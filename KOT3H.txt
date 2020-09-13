@@ -1012,13 +1012,13 @@ règle("Dispawn management")
 	{
 		Si(Distance entre(Joueur exécutant, Global.LocationA) <= Global.Radius || Distance entre(Joueur exécutant, Global.LocationB)
 			<= Global.Radius || Distance entre(Joueur exécutant, Global.LocationC) <= Global.Radius);
-			Téléportation(Joueur exécutant, Vecteur(Composante X de(Joueur exécutant), Composante Y de(Joueur exécutant) + 30, Composante Z de(
+			désactivé Téléportation(Joueur exécutant, Vecteur(Composante X de(Joueur exécutant), Composante Y de(Joueur exécutant) + 30, Composante Z de(
 				Position de(Joueur exécutant))));
-			désactivé Réapparaître(Joueur exécutant);
-			désactivé Attente(0.500, Ignorer la condition);
-			désactivé Tuer(Joueur exécutant, Non applicable);
-			désactivé Attente(5, Ignorer la condition);
-			désactivé Réapparaître(Joueur exécutant);
+			Réapparaître(Joueur exécutant);
+			Attente(0.500, Ignorer la condition);
+			Tuer(Joueur exécutant, Non applicable);
+			Attente(5, Ignorer la condition);
+			Réapparaître(Joueur exécutant);
 		Fin;
 	}
 }
