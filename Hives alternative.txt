@@ -1,0 +1,294 @@
+paramètres
+{
+	principal
+	{
+		Description: "Hives alternative is an alternative set of rules which modifies the life system. Your lifes points are now set in common with all your teamates. If you dies when your life bank is equal to 0, you can't respawn. Made by Lix#2563"
+	}
+
+	modes
+	{
+		Attaque
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+
+		Combat à mort par équipe
+
+		Escorte
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+
+		Élimination
+
+		Hybride
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+
+		Point de contrôle
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+	}
+}
+
+variables
+{
+	globale:
+		0: LifePool_A
+		1: LifePool_B
+}
+
+règle("Set life pool")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Global.LifePool_A = 100000;
+		Global.LifePool_B = 100000;
+	}
+}
+
+règle("HUD")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0}'s life supply  : {1}", Équipe 1,
+			Global.LifePool_A), Non applicable, Non applicable, Gauche, 0, Équipe 1, Blanc, Blanc, Visible pour et Chaîne de texte,
+			Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0}'s life supply  : {1}", Équipe 2,
+			Global.LifePool_B), Non applicable, Non applicable, Droite, 0, Équipe 2, Blanc, Blanc, Visible pour et Chaîne de texte,
+			Visibilité par défaut);
+		Créer du texte d’interface(Joueurs sur le héros(Héros(Zenyatta), Toutes les équipes), Chaîne personnalisée(
+			"Your ultimate reset the ultimate charge of enemies"), Non applicable, Non applicable, Haut, 0, Orange, Blanc, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Joueurs sur le héros(Héros(Zenyatta), Toutes les équipes), Chaîne personnalisée(
+			"Your ultimate will also give back 1000 life point in the supply"), Non applicable, Non applicable, Haut, 0, Orange, Blanc,
+			Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+règle("Team A : If damage is taken => get heal from life pool")
+{
+	évènement
+	{
+		Un joueur subit des dégâts;
+		Équipe 1;
+		Tout;
+	}
+
+	conditions
+	{
+		Global.LifePool_A > 0;
+	}
+
+	actions
+	{
+		Soigner(Joueur exécutant, Non applicable, Dégâts d’évènement);
+		Global.LifePool_A -= Dégâts d’évènement;
+	}
+}
+
+règle("Team B : If damage is taken => get heal from life pool")
+{
+	évènement
+	{
+		Un joueur subit des dégâts;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Global.LifePool_B > 0;
+	}
+
+	actions
+	{
+		Soigner(Joueur exécutant, Non applicable, Dégâts d’évènement);
+		Global.LifePool_B -= Dégâts d’évènement;
+	}
+}
+
+règle("If player dies => display message to allow respawn")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Mort(Joueur exécutant) ? Joueur exécutant : Non applicable, Chaîne personnalisée(
+			"Press {0} to respawn against {1} points from the life supply", Bouton(Interaction), Points de vie maximum(Joueur exécutant)
+			* 2), Non applicable, Non applicable, Haut, 0, Violet, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+règle("Request respawn")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Mort(Joueur exécutant) == Vrai;
+		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+	}
+
+	actions
+	{
+		Réapparaître(Joueur exécutant);
+		Si(Équipe de(Joueur exécutant) == Équipe 1);
+			Global.LifePool_A -= Points de vie maximum(Joueur exécutant) * 2;
+		Sinon Si(Équipe de(Joueur exécutant) == Équipe 2);
+			Global.LifePool_B -= Points de vie maximum(Joueur exécutant) * 2;
+		Fin;
+		Définir les dégâts subis(Joueur exécutant, 0);
+		Téléportation(Joueur exécutant, Position de(Joueur le plus proche de(Joueur exécutant, Équipe de(Joueur exécutant))));
+		Attente(0.600, Ignorer la condition);
+		Définir les dégâts subis(Joueur exécutant, 100);
+	}
+}
+
+règle("No more life in the pool A => players in A can't respawn")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.LifePool_A <= 0;
+	}
+
+	actions
+	{
+		Désactiver la réapparition prédéfinie par le mode de jeu(Tous les joueurs(Équipe 1));
+	}
+}
+
+règle("No more life in the pool B => players in A can't respawn")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.LifePool_B <= 0;
+	}
+
+	actions
+	{
+		Désactiver la réapparition prédéfinie par le mode de jeu(Tous les joueurs(Équipe 2));
+	}
+}
+
+règle("All player in A are dead with no more life in the pool")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.LifePool_A <= 0;
+		Nombre de joueurs morts(Équipe 1) == Nombre de joueurs(Équipe 1);
+	}
+
+	actions
+	{
+		Déclarer la victoire d’une équipe(Équipe 2);
+	}
+}
+
+règle("All player in B are dead with no more life in the pool")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.LifePool_B <= 0;
+		Nombre de joueurs morts(Équipe 2) == Nombre de joueurs(Équipe 2);
+	}
+
+	actions
+	{
+		Déclarer la victoire d’une équipe(Équipe 1);
+	}
+}
+
+règle("Mercy Rez = +1k in supply")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Héros de(Joueur exécutant) == Héros(Ange);
+		Capacité ultime utilisée(Joueur exécutant) == Vrai;
+	}
+
+	actions
+	{
+		Si(Équipe de(Joueur exécutant) == Équipe 1);
+			Global.LifePool_A += 1000;
+		Sinon;
+			Global.LifePool_B += 1000;
+		Fin;
+		Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
+			"{0} resurect someone and recovered 1000 life point in the supply of {1}", Joueur exécutant, Équipe de(Joueur exécutant)));
+	}
+}
+
+règle("Zen Trans => reset ult charge")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Héros de(Joueur exécutant) == Héros(Zenyatta);
+		Capacité ultime utilisée(Joueur exécutant) == Vrai;
+	}
+
+	actions
+	{
+		Si(Équipe de(Joueur exécutant) == Équipe 1);
+			Définir la charge de la capacité ultime(Tous les joueurs(Équipe 1), 0);
+		Sinon;
+			Définir la charge de la capacité ultime(Tous les joueurs(Équipe 2), 0);
+		Fin;
+	}
+}

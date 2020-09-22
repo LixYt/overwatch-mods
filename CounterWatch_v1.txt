@@ -1,0 +1,228 @@
+paramètres
+{
+	salon
+	{
+		Joueurs max. dans Équipe 1.: 1
+		Joueurs max. dans Équipe 2.: 1
+	}
+
+	modes
+	{
+		désactivé Attaque
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+
+		Escorte
+		{
+			Limite de rôles: 2 de chaque par équipe
+
+			cartes activées
+			{
+				Route 66
+			}
+		}
+
+		désactivé Hybride
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+
+		désactivé Point de contrôle
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+	}
+}
+
+variables
+{
+	globale:
+		0: BombOwner
+		1: LocationA
+		2: LocationB
+		3: LocationC
+		4: Radius
+		5: BombLocation
+		6: BombEffect
+
+	de joueur:
+		0: Timer
+}
+
+règle("Gle Settings")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Désactiver la réapparition prédéfinie par le mode de jeu(Tous les joueurs(Toutes les équipes));
+		Désactiver l’accomplissement prédéfini par le mode de jeu;
+		Désactiver l’annonceur prédéfini par le mode de jeu;
+		Global.Radius = 6;
+	}
+}
+
+règle("Bomb management")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		Global.BombOwner = Valeur aléatoire dans le tableau(Tous les joueurs(Équipe 2));
+	}
+}
+
+règle("HUD (common)")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Équipe 2), Chaîne personnalisée("Bomb holder : {0}", Global.BombOwner), Non applicable,
+			Non applicable, Gauche, 0, Blanc, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Global.BombLocation == 0 ? 0 : Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
+			"The bomb has been planted."), Non applicable, Non applicable, Haut, 0, Violet, Blanc, Blanc, Visible pour et Chaîne de texte,
+			Visibilité par défaut);
+	}
+}
+
+règle("HUD (bomb owner)")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Global.BombOwner, Chaîne personnalisée("Press {0} in an area to plant it", Bouton(Interaction)),
+			Non applicable, Non applicable, Haut, 0, Rouge, Blanc, Blanc, Visible pour, Visibilité par défaut);
+	}
+}
+
+règle("Sites (King's Row)")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Carte actuelle == Carte(Route 66);
+	}
+
+	actions
+	{
+		Global.LocationA = Vecteur(32.911, 3.394, -1.331);
+		Global.LocationB = Vecteur(-30.172, 9.676, -19.476);
+		Global.LocationC = Vecteur(-106.639, 13.750, -27.226);
+	}
+}
+
+règle("Sites Effects")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		désactivé Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Blanc, Global.LocationA, Global.Radius,
+			Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Blanc, Global.LocationB, Global.Radius,
+			Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Blanc, Global.LocationC, Global.Radius,
+			Visible pour Position et Rayon);
+	}
+}
+
+règle("BombOwner Plant the bomb")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant == Global.BombOwner;
+		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+		(Distance entre(Global.LocationA, Position de(Joueur exécutant)) <= Global.Radius || Distance entre(Global.LocationB, Position de(
+			Joueur exécutant)) <= Global.Radius || Distance entre(Global.LocationC, Position de(Joueur exécutant)) <= Global.Radius)
+			== Vrai;
+	}
+
+	actions
+	{
+		Global.BombLocation = Position de(Joueur exécutant);
+		Global.BombOwner = 0;
+		Créer un effet(Tous les joueurs(Toutes les équipes), Orbe, Équipe 2, Global.BombLocation, 1, Visible pour Position et Rayon);
+		Global.BombEffect = Dernière entité créée;
+	}
+}
+
+règle("A player (Team 1) diffuse the bomb")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 1;
+		Tout;
+	}
+
+	conditions
+	{
+		Distance entre(Position de(Joueur exécutant), Global.BombLocation) <= 2;
+		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+		Global.BombLocation != 0;
+	}
+
+	actions
+	{
+		Pour variable de joueur(Joueur exécutant, Timer, 5, 0, -1);
+			Message en petit(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Bomb will be diffused in ... {0}",
+				Joueur exécutant.Timer));
+			Attente(1, Ignorer la condition);
+			Interrompre si la condition est fausse;
+		Fin;
+		Interrompre si la condition est fausse;
+		Global.BombLocation = 0;
+		Détruire un effet(Global.BombEffect);
+	}
+}
