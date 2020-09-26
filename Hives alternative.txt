@@ -49,8 +49,8 @@ règle("Set life pool")
 
 	actions
 	{
-		Global.LifePool_A = 100000;
-		Global.LifePool_B = 100000;
+		Global.LifePool_A = 1000;
+		Global.LifePool_B = 1000;
 	}
 }
 
@@ -131,7 +131,11 @@ règle("If player dies => display message to allow respawn")
 
 	actions
 	{
-		Créer du texte d’interface(Mort(Joueur exécutant) ? Joueur exécutant : Non applicable, Chaîne personnalisée(
+		désactivé Créer du texte d’interface(Mort(Joueur exécutant) ? Joueur exécutant : Non applicable, Chaîne personnalisée(
+			"Press {0} to respawn against {1} points from the life supply", Bouton(Interaction), Points de vie maximum(Joueur exécutant)
+			* 2), Non applicable, Non applicable, Haut, 0, Violet, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Mort(Joueur exécutant) && ((Global.LifePool_A > 0 && Équipe de(Joueur exécutant) == Équipe 1) || (
+			Global.LifePool_B > 0 && Équipe de(Joueur exécutant) == Équipe 2)) ? Joueur exécutant : Non applicable, Chaîne personnalisée(
 			"Press {0} to respawn against {1} points from the life supply", Bouton(Interaction), Points de vie maximum(Joueur exécutant)
 			* 2), Non applicable, Non applicable, Haut, 0, Violet, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
 	}
@@ -150,6 +154,8 @@ règle("Request respawn")
 	{
 		Mort(Joueur exécutant) == Vrai;
 		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+		((Global.LifePool_A > 0 && Équipe de(Joueur exécutant) == Équipe 1) || (Global.LifePool_B > 0 && Équipe de(Joueur exécutant)
+			== Équipe 2)) == Vrai;
 	}
 
 	actions
@@ -161,8 +167,8 @@ règle("Request respawn")
 			Global.LifePool_B -= Points de vie maximum(Joueur exécutant) * 2;
 		Fin;
 		Définir les dégâts subis(Joueur exécutant, 0);
-		Téléportation(Joueur exécutant, Position de(Joueur le plus proche de(Joueur exécutant, Équipe de(Joueur exécutant))));
 		Attente(0.600, Ignorer la condition);
+		Téléportation(Joueur exécutant, Position de(Joueur le plus proche de(Joueur exécutant, Équipe de(Joueur exécutant))));
 		Définir les dégâts subis(Joueur exécutant, 100);
 	}
 }
