@@ -1,9 +1,13 @@
 paramètres
 {
+	principal
+	{
+		Description: "CounterStrike like : attackers must plant and defend the bomb. Defender must prevent bomb to explod by kill all the player in the other OR diffusing the bomb if it's planted !"
+	}
+
 	salon
 	{
-		Joueurs max. dans Équipe 1.: 1
-		Joueurs max. dans Équipe 2.: 1
+		Spectateurs max.: 12
 	}
 
 	modes
@@ -45,12 +49,32 @@ variables
 		4: Radius
 		5: BombLocation
 		6: BombEffect
+		7: BombPlanted
+		8: BombStatusEffect
+		9: BombTimer
+		10: BombExplosionRadius
+		11: BombDiffused
 
 	de joueur:
 		0: Timer
 }
 
-règle("Gle Settings")
+règle("Settings (player side)")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Désactiver la réapparition prédéfinie par le mode de jeu(Joueur exécutant);
+	}
+}
+
+règle("Settings (game side)")
 {
 	évènement
 	{
@@ -59,9 +83,12 @@ règle("Gle Settings")
 
 	actions
 	{
-		Désactiver la réapparition prédéfinie par le mode de jeu(Tous les joueurs(Toutes les équipes));
+		Global.BombPlanted = Faux;
+		Global.BombTimer = Faux;
+		Global.BombDiffused = Faux;
 		Désactiver l’accomplissement prédéfini par le mode de jeu;
 		Désactiver l’annonceur prédéfini par le mode de jeu;
+		Désactiver le calcul des points prédéfini par le mode de jeu;
 		Global.Radius = 6;
 	}
 }
@@ -100,7 +127,8 @@ règle("HUD (common)")
 	{
 		Créer du texte d’interface(Tous les joueurs(Équipe 2), Chaîne personnalisée("Bomb holder : {0}", Global.BombOwner), Non applicable,
 			Non applicable, Gauche, 0, Blanc, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
-		Créer du texte d’interface(Global.BombLocation == 0 ? 0 : Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
+		"deactivated because crappy design"
+		désactivé Créer du texte d’interface(Global.BombLocation == 0 ? 0 : Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
 			"The bomb has been planted."), Non applicable, Non applicable, Haut, 0, Violet, Blanc, Blanc, Visible pour et Chaîne de texte,
 			Visibilité par défaut);
 	}
@@ -190,6 +218,7 @@ règle("BombOwner Plant the bomb")
 
 	actions
 	{
+		Global.BombPlanted = Vrai;
 		Global.BombLocation = Position de(Joueur exécutant);
 		Global.BombOwner = 0;
 		Créer un effet(Tous les joueurs(Toutes les équipes), Orbe, Équipe 2, Global.BombLocation, 1, Visible pour Position et Rayon);
@@ -211,6 +240,7 @@ règle("A player (Team 1) diffuse the bomb")
 		Distance entre(Position de(Joueur exécutant), Global.BombLocation) <= 2;
 		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
 		Global.BombLocation != 0;
+		Global.BombPlanted == Vrai;
 	}
 
 	actions
@@ -224,5 +254,163 @@ règle("A player (Team 1) diffuse the bomb")
 		Interrompre si la condition est fausse;
 		Global.BombLocation = 0;
 		Détruire un effet(Global.BombEffect);
+		Global.BombPlanted = Faux;
+		Global.BombDiffused = Vrai;
+	}
+}
+
+règle("Bomb holder dies")
+{
+	évènement
+	{
+		Un joueur meurt;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant == Global.BombOwner;
+	}
+
+	actions
+	{
+		Global.BombLocation = Position de(Joueur exécutant);
+		Global.BombOwner = 0;
+		Créer un effet(Tous les joueurs(Toutes les équipes), Orbe, Équipe 2, Global.BombLocation, 1, Visible pour Position et Rayon);
+		Global.BombEffect = Dernière entité créée;
+	}
+}
+
+règle("Pickup the bomb")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Global.BombOwner == 0;
+		Distance entre(Position de(Joueur exécutant), Global.BombLocation) <= 2;
+		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+		Global.BombPlanted == Faux;
+	}
+
+	actions
+	{
+		Détruire un effet(Global.BombEffect);
+		Global.BombOwner = Joueur exécutant;
+		Global.BombLocation = 0;
+	}
+}
+
+règle("Bomb is planted")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.BombPlanted == Vrai;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée(
+			"The bomb has been planted. Explosion in {0} !", 60 - Global.BombTimer), Non applicable, Non applicable, Haut, 0, Violet,
+			Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Global.BombStatusEffect = Dernier identifiant de texte;
+		Global.BombTimer = 0;
+		Modifier une variable globale selon une cadence(BombTimer, 60, 1, Destination et Taux);
+	}
+}
+
+règle("Bomb is not planted")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.BombPlanted == Faux;
+	}
+
+	actions
+	{
+		Détruire du texte d’interface(Global.BombStatusEffect);
+		Arrêter de modifier une variable globale(BombTimer);
+		Global.BombTimer = Faux;
+	}
+}
+
+règle("Bomb explode")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.BombTimer == 60;
+		désactivé Global.BombTimer != Faux;
+		Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		Global.BombExplosionRadius = 1.500;
+		Créer un effet(Tous les joueurs(Toutes les équipes), Sphère, Rouge, Global.BombLocation, Global.BombExplosionRadius,
+			Visible pour Position et Rayon);
+		Tuer(Tous les joueurs en vie(Toutes les équipes), Non applicable);
+		Modifier une variable globale selon une cadence(BombExplosionRadius, 10, 2, Destination et Taux);
+		Attente(2, Ignorer la condition);
+		Modifier une variable globale selon une cadence(BombExplosionRadius, 100, 20, Destination et Taux);
+	}
+}
+
+règle("Victory of team 1 (def)")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+		(Global.BombDiffused == Vrai || (Nombre de joueurs morts(Équipe 2) == Nombre de joueurs(Équipe 2) && Global.BombPlanted == Faux))
+			== Vrai;
+	}
+
+	actions
+	{
+		Déclarer la victoire d’une équipe(Équipe 1);
+	}
+}
+
+règle("Victory of team 2 (attak)")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+		(Global.BombTimer == 60 || Nombre de joueurs morts(Équipe 1) == Nombre de joueurs(Équipe 1)) == Vrai;
+	}
+
+	actions
+	{
+		Déclarer la victoire d’une équipe(Équipe 2);
 	}
 }
