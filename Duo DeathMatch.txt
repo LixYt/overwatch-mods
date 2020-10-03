@@ -90,6 +90,10 @@ règle("When Preparation => Hit = Match players")
 
 	actions
 	{
+		Si(
+			Victime == Global.TeamBlue[0] || Victime == Global.TeamBlue[1] || Victime == Global.TeamRed[0] || Victime == Global.TeamRed[1] || Victime == Global.TeamYellow[0] || Victime == Global.TeamYellow[1] || Victime == Global.TeamGreen[0] || Victime == Global.TeamGreen[1] || Victime == Global.TeamPurple[0] || Victime == Global.TeamPurple[1] || Victime == Global.TeamOrange[0] || Victime == Global.TeamOrange[1]);
+			Interrompre;
+		Fin;
 		Si(Global.TeamBlue == Faux);
 			Global.TeamBlue[0] = Joueur exécutant;
 			Joueur exécutant.HasTeamate = Vrai;
