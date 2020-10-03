@@ -1,0 +1,406 @@
+paramètres
+{
+	modes
+	{
+		Combat à mort
+		{
+			cartes activées
+			{
+				Blizzard World
+			}
+		}
+
+		Général
+		{
+			Limite de rôles: 2 de chaque par équipe
+		}
+	}
+}
+
+variables
+{
+	globale:
+		0: GameStarted
+		1: TeamBlue
+		2: TeamRed
+		3: TeamYellow
+		4: TeamGreen
+		5: TeamPurple
+		6: TeamOrange
+		7: CurrentPlayersWithMate
+		8: HostAllowToStart
+
+	de joueur:
+		0: HasTeamate
+}
+
+règle("Preparation")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Global.TeamBlue = Faux;
+		Global.TeamRed = Faux;
+		Global.TeamYellow = Faux;
+		Global.TeamGreen = Faux;
+		Global.TeamPurple = Faux;
+		Global.TeamOrange = Faux;
+		Définir la description d’objectif(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Hit a player to match with."),
+			Visible pour et Chaîne de texte);
+		Désactiver l’accomplissement prédéfini par le mode de jeu;
+		Définir les dégâts subis(Tous les joueurs(Toutes les équipes), 1);
+	}
+}
+
+règle("Init")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Joueur exécutant.HasTeamate = Faux;
+	}
+}
+
+règle("When Preparation => Hit = Match")
+{
+	évènement
+	{
+		Un joueur inflige des dégâts;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Global.GameStarted == Faux;
+		Joueur exécutant.HasTeamate == Faux;
+	}
+
+	actions
+	{
+		Si(Global.TeamBlue == Faux);
+			Global.TeamBlue[0] = Joueur exécutant;
+			Joueur exécutant.HasTeamate = Vrai;
+			Global.TeamBlue[1] = Victime;
+			Victime.HasTeamate = Vrai;
+			Global.GameStarted += 2;
+			Interrompre;
+		Fin;
+		Si(Global.TeamRed == Faux);
+			Global.TeamRed[0] = Joueur exécutant;
+			Joueur exécutant.HasTeamate = Vrai;
+			Global.TeamRed[1] = Victime;
+			Victime.HasTeamate = Vrai;
+			Global.GameStarted += 2;
+			Interrompre;
+		Fin;
+		Si(Global.TeamYellow == Faux);
+			Global.TeamYellow[0] = Joueur exécutant;
+			Joueur exécutant.HasTeamate = Vrai;
+			Global.TeamYellow[1] = Victime;
+			Victime.HasTeamate = Vrai;
+			Global.GameStarted += 2;
+			Interrompre;
+		Fin;
+		Si(Global.TeamGreen == Faux);
+			Global.TeamGreen[0] = Joueur exécutant;
+			Joueur exécutant.HasTeamate = Vrai;
+			Global.TeamGreen[1] = Victime;
+			Victime.HasTeamate = Vrai;
+			Global.GameStarted += 2;
+			Interrompre;
+		Fin;
+		Si(Global.TeamPurple == Faux);
+			Global.TeamPurple[0] = Joueur exécutant;
+			Joueur exécutant.HasTeamate = Vrai;
+			Global.TeamPurple[1] = Victime;
+			Victime.HasTeamate = Vrai;
+			Global.GameStarted += 2;
+			Interrompre;
+		Fin;
+		Si(Global.TeamOrange == Faux);
+			Global.TeamOrange[0] = Joueur exécutant;
+			Joueur exécutant.HasTeamate = Vrai;
+			Global.TeamOrange[1] = Victime;
+			Victime.HasTeamate = Vrai;
+			Global.GameStarted += 2;
+			Interrompre;
+		Fin;
+	}
+}
+
+règle("Effects")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer un effet de rayon(Global.TeamBlue, Bon rayon, Global.TeamBlue[0], Global.TeamBlue[1], Bleu, Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Bleu, Global.TeamBlue[0], 1, Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Bleu, Global.TeamBlue[1], 1, Visible pour Position et Rayon);
+		Créer un effet de rayon(Global.TeamRed, Bon rayon, Global.TeamRed[0], Global.TeamRed[1], Rouge, Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Rouge, Global.TeamRed[0], 1, Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Rouge, Global.TeamRed[1], 1, Visible pour Position et Rayon);
+		Créer un effet de rayon(Global.TeamYellow, Bon rayon, Global.TeamYellow[0], Global.TeamYellow[1], Jaune,
+			Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Jaune, Global.TeamYellow[0], 1, Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Jaune, Global.TeamYellow[1], 1, Visible pour Position et Rayon);
+		Créer un effet de rayon(Global.TeamGreen, Bon rayon, Global.TeamGreen[0], Global.TeamGreen[1], Vert,
+			Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Vert, Global.TeamGreen[0], 1, Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Vert, Global.TeamGreen[1], 1, Visible pour Position et Rayon);
+		Créer un effet de rayon(Global.TeamPurple, Bon rayon, Global.TeamPurple[0], Global.TeamPurple[1], Violet,
+			Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Violet, Global.TeamPurple[0], 1, Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Violet, Global.TeamPurple[1], 1, Visible pour Position et Rayon);
+		Créer un effet de rayon(Global.TeamOrange, Bon rayon, Global.TeamOrange[0], Global.TeamOrange[1], Orange,
+			Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.TeamOrange[0], 1, Visible pour Position et Rayon);
+		Créer un effet(Tous les joueurs(Toutes les équipes), Anneau, Orange, Global.TeamOrange[1], 1, Visible pour Position et Rayon);
+	}
+}
+
+règle("Test IA")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant == Joueur hôte;
+		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+	}
+
+	actions
+	{
+		Créer une I.A.(Héros(Ana), Toutes les équipes, -1, Vecteur(-71.904, 2.338, 127.234), Vecteur(0, 0, 0));
+	}
+}
+
+règle("Everyone has teammate => start game")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Nombre de joueurs(Toutes les équipes) == Global.CurrentPlayersWithMate;
+		Global.HostAllowToStart == Vrai;
+	}
+
+	actions
+	{
+		Global.GameStarted = Vrai;
+	}
+}
+
+règle("Game Start")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.GameStarted == Vrai;
+	}
+
+	actions
+	{
+		Définir les dégâts subis(Tous les joueurs(Toutes les équipes), 100);
+		Définir la description d’objectif(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Kill everyone but your mate"),
+			Visible pour et Chaîne de texte);
+		Définir le temps de jeu(300);
+	}
+}
+
+règle("Victory")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Global.GameStarted == Vrai;
+		Temps de jeu == 0;
+	}
+
+	actions
+	{
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Team {0} Wins !"));
+		Attente(2, Ignorer la condition);
+		Déclarer le match nul;
+	}
+}
+
+règle("Score HUD")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Non applicable, Chaîne personnalisée(
+			"Team Blue : K = {0} / D = {1}", Global.TeamBlue[2], Global.TeamBlue[3]), Non applicable, Droite, 0, Blanc, Bleu, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Non applicable, Chaîne personnalisée(
+			"Team Red : K = {0} / D = {1}", Global.TeamRed[2], Global.TeamRed[3]), Non applicable, Droite, 0, Blanc, Rouge, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Non applicable, Chaîne personnalisée(
+			"Team Yellow : K = {0} / D = {1}", Global.TeamYellow[2], Global.TeamYellow[3]), Non applicable, Droite, 0, Blanc, Jaune, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Non applicable, Chaîne personnalisée(
+			"Team Green : K = {0} / D = {1}", Global.TeamGreen[2], Global.TeamGreen[3]), Non applicable, Droite, 0, Blanc, Vert, Blanc,
+			Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Non applicable, Chaîne personnalisée(
+			"Team Purple : K = {0} / D = {1}", Global.TeamPurple[2], Global.TeamPurple[3]), Non applicable, Droite, 0, Blanc, Violet,
+			Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Non applicable, Chaîne personnalisée(
+			"Team Orange : K = {0} / D = {1}", Global.TeamOrange[2], Global.TeamOrange[3]), Non applicable, Droite, 0, Blanc, Orange,
+			Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+règle("Host HUD")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant == Joueur hôte;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Joueur hôte, Global.HostAllowToStart ? (Global.GameStarted ? Chaîne personnalisée("Game is running...")
+			: Chaîne personnalisée("Game Will start as soon as everyon has a teamate")) : Chaîne personnalisée(
+			"Press {0} to allow the game to start", Bouton maintenu enfoncé(Joueur exécutant, Interaction)), Non applicable,
+			Non applicable, Gauche, 0, Rouge, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+	}
+}
+
+règle("Host allow to start the game")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant == Joueur hôte;
+		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+		Global.HostAllowToStart == Faux;
+	}
+
+	actions
+	{
+		Global.HostAllowToStart = Vrai;
+	}
+}
+
+règle("Player hits mate")
+{
+	évènement
+	{
+		Un joueur meurt;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		Si((Victime == Global.TeamBlue[0] || Victime == Global.TeamBlue[1]) && (
+			Attaquant == Global.TeamBlue[0] || Attaquant == Global.TeamBlue[1]));
+			Global.TeamBlue[2] -= 2;
+		Sinon Si((Victime == Global.TeamRed[0] || Victime == Global.TeamRed[1]) && (
+				Attaquant == Global.TeamRed[0] || Attaquant == Global.TeamRed[1]));
+			Global.TeamRed[2] -= 2;
+		Sinon Si((Victime == Global.TeamYellow[0] || Victime == Global.TeamYellow[1]) && (
+				Attaquant == Global.TeamYellow[0] || Attaquant == Global.TeamYellow[1]));
+			Global.TeamYellow[2] -= 2;
+		Sinon Si((Victime == Global.TeamGreen[0] || Victime == Global.TeamGreen[1]) && (
+				Attaquant == Global.TeamGreen[0] || Attaquant == Global.TeamGreen[1]));
+			Global.TeamGreen[2] -= 2;
+		Sinon Si((Victime == Global.TeamPurple[0] || Victime == Global.TeamPurple[1]) && (
+				Attaquant == Global.TeamPurple[0] || Attaquant == Global.TeamPurple[1]));
+			Global.TeamPurple[2] -= 2;
+		Sinon Si((Victime == Global.TeamOrange[0] || Victime == Global.TeamOrange[1]) && (
+				Attaquant == Global.TeamOrange[0] || Attaquant == Global.TeamOrange[1]));
+			Global.TeamOrange[2] -= 2;
+		Fin;
+	}
+}
+
+règle("Player kill someone")
+{
+	évènement
+	{
+		Un joueur meurt;
+		Les deux;
+		Tout;
+	}
+
+	actions
+	{
+		"Bellow : increment Kills"
+		Si(Attaquant == Global.TeamBlue[0] || Attaquant == Global.TeamBlue[1]);
+			Global.TeamBlue[2] += 1;
+		Sinon Si(Attaquant == Global.TeamRed[0] || Attaquant == Global.TeamRed[1]);
+			Global.TeamRed[2] += 1;
+		Sinon Si(Attaquant == Global.TeamYellow[0] || Attaquant == Global.TeamYellow[1]);
+			Global.TeamYellow[2] += 1;
+		Sinon Si(Attaquant == Global.TeamGreen[0] || Attaquant == Global.TeamGreen[1]);
+			Global.TeamGreen[2] += 1;
+		Sinon Si(Attaquant == Global.TeamPurple[0] || Attaquant == Global.TeamPurple[1]);
+			Global.TeamPurple[2] += 1;
+		Sinon Si(Attaquant == Global.TeamOrange[0] || Attaquant == Global.TeamOrange[1]);
+			Global.TeamOrange[2] += 1;
+		Fin;
+		"Bellow : increment Death"
+		Si(Victime == Global.TeamBlue[0] || Victime == Global.TeamBlue[1]);
+			Global.TeamBlue[3] += 1;
+		Sinon Si(Victime == Global.TeamRed[0] || Victime == Global.TeamRed[1]);
+			Global.TeamRed[3] += 1;
+		Sinon Si(Victime == Global.TeamYellow[0] || Victime == Global.TeamYellow[1]);
+			Global.TeamYellow[3] += 1;
+		Sinon Si(Victime == Global.TeamGreen[0] || Victime == Global.TeamGreen[1]);
+			Global.TeamGreen[3] += 1;
+		Sinon Si(Victime == Global.TeamPurple[0] || Victime == Global.TeamPurple[1]);
+			Global.TeamPurple[3] += 1;
+		Sinon Si(Victime == Global.TeamOrange[0] || Victime == Global.TeamOrange[1]);
+			Global.TeamOrange[3] += 1;
+		Fin;
+	}
+}
