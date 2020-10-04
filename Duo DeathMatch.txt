@@ -449,25 +449,8 @@ règle("Game ends")
 				Global.TeamOrange[2] > Global.TeamRed[2] && Global.TeamOrange[2] > Global.TeamYellow[2] && Global.TeamOrange[2] > Global.TeamGreen[2] && Global.TeamOrange[2] > Global.TeamPurple[2] && Global.TeamOrange[2] > Global.TeamBlue[2]);
 			Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Team Orange Wins !"));
 		Fin;
-		Attente(5, Ignorer la condition);
 		Global.GameEnds = Vrai;
-	}
-}
-
-règle("Stop Game")
-{
-	évènement
-	{
-		Toute la partie - Tout le monde;
-	}
-
-	conditions
-	{
-		Global.GameEnds == Vrai;
-	}
-
-	actions
-	{
+		Attente(5, Ignorer la condition);
 		Déclarer le match nul;
 	}
 }
