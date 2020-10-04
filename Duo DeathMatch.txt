@@ -249,6 +249,11 @@ règle("Score HUD")
 		Toute la partie - Tout le monde;
 	}
 
+	conditions
+	{
+		Global.GameStarted == Vrai;
+	}
+
 	actions
 	{
 		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Non applicable, Chaîne personnalisée(
@@ -292,6 +297,8 @@ règle("Host HUD")
 			: Chaîne personnalisée("Game Will start as soon as everyon has a teamate")) : Chaîne personnalisée(
 			"Press {0} to allow the game to start", Bouton maintenu enfoncé(Joueur exécutant, Interaction)), Non applicable,
 			Non applicable, Gauche, 0, Rouge, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0}", Temps de jeu), Non applicable,
+			Non applicable, Haut, 0, Blanc, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
 	}
 }
 
@@ -317,13 +324,18 @@ règle("Host allow to start the game")
 	}
 }
 
-règle("Player hits mate")
+règle("Player kills mate")
 {
 	évènement
 	{
 		Un joueur meurt;
 		Les deux;
 		Tout;
+	}
+
+	conditions
+	{
+		Global.GameStarted == Vrai;
 	}
 
 	actions
@@ -363,6 +375,11 @@ règle("Player kill someone")
 		Un joueur meurt;
 		Les deux;
 		Tout;
+	}
+
+	conditions
+	{
+		Global.GameStarted == Vrai;
 	}
 
 	actions
@@ -408,7 +425,7 @@ règle("Game ends")
 	conditions
 	{
 		Global.GameStarted == Vrai;
-		Temps total écoulé == 300;
+		Temps de jeu <= 0;
 	}
 
 	actions
