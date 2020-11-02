@@ -1,18 +1,23 @@
 paramètres
 {
+	salon
+	{
+		Inversion des équipes après une partie: Non
+		Mettre le jeu en pause en cas de déconnexion d’un joueur: Oui
+		Spectateurs max.: 12
+		Utiliser les mises à jour du Laboratoire s’il y en a: Oui
+	}
+
 	modes
 	{
 		Combat à mort
-		{
-			cartes activées
-			{
-				Blizzard World
-			}
-		}
 
 		Général
 		{
-			Limite de rôles: 2 de chaque par équipe
+			Apparition des kits de soins: Activé
+			Début de la partie: Immédiatement
+			Journal d’action: Désactivé
+			Limite de héros: Désactivé
 		}
 	}
 }
@@ -30,9 +35,31 @@ variables
 		7: CurrentPlayersWithMate
 		8: HostAllowToStart
 		9: GameEnds
+		10: MaxScore
 
 	de joueur:
 		0: HasTeamate
+}
+
+règle("Test IA")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant == Joueur hôte;
+		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
+	}
+
+	actions
+	{
+		Créer une I.A.(Héros(Ana), Toutes les équipes, -1, Vecteur(-71.904, 2.338, 127.234), Vecteur(0, 0, 0));
+	}
 }
 
 règle("Preparation")
@@ -55,6 +82,7 @@ règle("Preparation")
 		Désactiver l’accomplissement prédéfini par le mode de jeu;
 		Définir les dégâts subis(Tous les joueurs(Toutes les équipes), 1);
 		Global.GameEnds = Faux;
+		Activer l’interface en jeu du mode de jeu(Tous les joueurs(Toutes les équipes));
 	}
 }
 
@@ -179,27 +207,6 @@ règle("Effects")
 	}
 }
 
-règle("Test IA")
-{
-	évènement
-	{
-		Toute la partie - Chaque joueur;
-		Les deux;
-		Tout;
-	}
-
-	conditions
-	{
-		Joueur exécutant == Joueur hôte;
-		Bouton maintenu enfoncé(Joueur exécutant, Interaction) == Vrai;
-	}
-
-	actions
-	{
-		Créer une I.A.(Héros(Ana), Toutes les équipes, -1, Vecteur(-71.904, 2.338, 127.234), Vecteur(0, 0, 0));
-	}
-}
-
 règle("Everyone has teammate => start game")
 {
 	évènement
@@ -239,6 +246,8 @@ règle("Game Start")
 		Définir la description d’objectif(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Kill everyone but your mate"),
 			Visible pour et Chaîne de texte);
 		Définir le temps de jeu(300);
+		Reprendre le temps de jeu;
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("Game Starts Now ! "));
 	}
 }
 
@@ -297,8 +306,6 @@ règle("Host HUD")
 			: Chaîne personnalisée("Game Will start as soon as everyon has a teamate")) : Chaîne personnalisée(
 			"Press {0} to allow the game to start", Bouton maintenu enfoncé(Joueur exécutant, Interaction)), Non applicable,
 			Non applicable, Gauche, 0, Rouge, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
-		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0}", Temps de jeu), Non applicable,
-			Non applicable, Haut, 0, Blanc, Blanc, Blanc, Visible pour et Chaîne de texte, Visibilité par défaut);
 	}
 }
 
@@ -426,6 +433,9 @@ règle("Game ends")
 	{
 		Global.GameStarted == Vrai;
 		Temps de jeu <= 0;
+		(
+			Global.TeamBlue > Global.MaxScore || Global.TeamRed > Global.MaxScore || Global.TeamYellow > Global.MaxScore || Global.TeamGreen > Global.MaxScore || Global.TeamPurple > Global.MaxScore || Global.TeamOrange > Global.MaxScore)
+			== Vrai;
 	}
 
 	actions
@@ -451,6 +461,19 @@ règle("Game ends")
 		Fin;
 		Global.GameEnds = Vrai;
 		Attente(5, Ignorer la condition);
-		Déclarer le match nul;
+		Déclarer la victoire d’un joueur(Joueur hôte);
+	}
+}
+
+règle("Settings")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Global.MaxScore = Paramètre entier de la Forge(Chaîne personnalisée("Score"), Chaîne personnalisée("Score max"), 30, 1, 9999999);
 	}
 }

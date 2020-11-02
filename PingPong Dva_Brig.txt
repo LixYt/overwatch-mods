@@ -1,0 +1,313 @@
+paramètres
+{
+	salon
+	{
+		Autoriser les joueurs en file d’attente: Oui
+		Joueurs max. dans Équipe 1.: 11
+		Joueurs max. dans Équipe 2.: 1
+		Spectateurs max.: 12
+		Utiliser les mises à jour du Laboratoire s’il y en a: Oui
+	}
+
+	modes
+	{
+		Combat à mort par équipe
+		{
+			Durée de la partie en minutes: 7
+
+			cartes activées
+			{
+				Salle de la Forge
+			}
+		}
+
+		désactivé Élimination
+		{
+			Score à atteindre pour gagner: 5
+			Sélection de héros: Aléatoire miroir
+		}
+
+		Général
+		{
+			Changement de héros: Désactivé
+			Début de la partie: Immédiatement
+			Limite de héros: Désactivé
+			Temps de réapparition: 0%
+		}
+	}
+
+	héros
+	{
+		Général
+		{
+			Dégâts infligés: 10%
+			Dégâts subis: 500%
+			Génération de capacité ultime: 10%
+			Génération de capacité ultime - Combat: 0%
+			Génération de capacité ultime - Passif: 0%
+			Soins prodigués: 10%
+			Soins reçus: 500%
+
+			Brigitte
+			{
+				Recul de Charge de bouclier: 200%
+				Recul de Fléau cinglant: 300%
+				Temps de recharge de Charge de bouclier: 60%
+				Temps de recharge de Fléau cinglant: 30%
+				Vie: 500%
+			}
+
+			D.Va
+			{
+				Dégâts subis: 10%
+				Soins reçus: 500%
+				Vie: 500%
+			}
+
+			héros activés
+			{
+				Brigitte
+			}
+		}
+	}
+}
+
+variables
+{
+	globale:
+		0: LastPlayerToHitDva
+
+	de joueur:
+		0: Score
+		1: InitialPosition
+}
+
+règle("Create Dva ball")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	conditions
+	{
+		Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		Créer une I.A.(Héros(D.Va), Équipe 2, -1, Vecteur(0, 3, 0), Vecteur(0, 0, 0));
+		Prodiguer des soins sur la durée(Joueurs sur le héros(Héros(D.Va), Équipe 2), Non applicable, 9999, 600);
+		Définir la gravité(Tous les joueurs(Équipe 2), 45);
+	}
+}
+
+règle("Fillet")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Rayon du grappin, Vecteur(-25, 1.500, 0), Vecteur(0, 1.500, 0),
+			Citron vert, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Rayon du grappin, Vecteur(-25, 1.200, 0), Vecteur(0, 0, 0),
+			Citron vert, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Rayon du grappin, Vecteur(-25, 0, 0), Vecteur(0, 1.200, 0),
+			Citron vert, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Rayon du grappin, Vecteur(-25, 0.600, 0), Vecteur(0, 0.600, 0),
+			Citron vert, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Rayon du grappin, Vecteur(0, 1.500, 0), Vecteur(25, 1.500, 0),
+			Citron vert, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Rayon du grappin, Vecteur(0, 1.200, 0), Vecteur(25, 0, 0),
+			Citron vert, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Rayon du grappin, Vecteur(0, 0, 0), Vecteur(25, 1.200, 0),
+			Citron vert, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Rayon du grappin, Vecteur(0, 0.600, 0), Vecteur(25, 0.600, 0),
+			Citron vert, Visible pour Position et Rayon);
+		Créer un effet de rayon(Tous les joueurs(Toutes les équipes), Rayon du grappin, Vecteur(0, 1.500, 0), Vecteur(0, 0, 0),
+			Citron vert, Visible pour Position et Rayon);
+	}
+}
+
+règle("Dva hits ground")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Héros de(Joueur exécutant) == Héros(D.Va);
+		Composante Y de(Position de(Joueur exécutant)) == 0;
+		Global.LastPlayerToHitDva != 0;
+		Composante Z de(Position de(Joueur exécutant)) != 0;
+		Composante X de(Position de(Joueur exécutant)) != 0;
+	}
+
+	actions
+	{
+		Global.LastPlayerToHitDva.Score += 1;
+		Attente(0.250, Ignorer la condition);
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0} get a point. Dva in the middle.",
+			Global.LastPlayerToHitDva));
+		Téléportation(Tous les joueurs(Équipe 2), Vecteur(0, 10, 0));
+		Attente(0.100, Ignorer la condition);
+		Global.LastPlayerToHitDva = 0;
+	}
+}
+
+règle("DVa Hitted")
+{
+	évènement
+	{
+		Un joueur a reçu un recul;
+		Équipe 2;
+		Tout;
+	}
+
+	conditions
+	{
+		Héros de(Joueur exécutant) == Héros(D.Va);
+	}
+
+	actions
+	{
+		désactivé Attente(0.020, Ignorer la condition);
+		Global.LastPlayerToHitDva = Attaquant;
+	}
+}
+
+règle("Scores")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 1;
+		Tout;
+	}
+
+	actions
+	{
+		Créer du texte d’interface(Tous les joueurs(Toutes les équipes), Non applicable, Non applicable, Chaîne personnalisée("{0} : {1}",
+			Joueur exécutant, Joueur exécutant.Score), Droite, 0, Blanc, Blanc, Blanc, Visible pour et Chaîne de texte,
+			Visibilité par défaut);
+	}
+}
+
+règle("Win")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 1;
+		Tout;
+	}
+
+	conditions
+	{
+		Joueur exécutant.Score >= 10;
+	}
+
+	actions
+	{
+		Message en grand(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0} wins", Joueur exécutant));
+		Attente(0.250, Ignorer la condition);
+		Déclarer la victoire de la manche(Toutes les équipes);
+	}
+}
+
+règle("Label over Dva with last player to hit")
+{
+	évènement
+	{
+		Toute la partie - Tout le monde;
+	}
+
+	actions
+	{
+		Créer du texte en jeu(Tous les joueurs(Toutes les équipes), Chaîne personnalisée("{0}", Global.LastPlayerToHitDva),
+			Joueurs sur le héros(Héros(D.Va), Équipe 2), 1, Masquer derrière les surfaces, Visible pour Position et Chaîne de texte, Blanc,
+			Visibilité par défaut);
+	}
+}
+
+règle("Spawn = save initail position")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Équipe 1;
+		Tout;
+	}
+
+	conditions
+	{
+		Position de(Joueur exécutant) != 0;
+		Partie en cours == Vrai;
+	}
+
+	actions
+	{
+		Joueur exécutant.InitialPosition = Position de(Joueur exécutant);
+	}
+}
+
+règle("Can move only in the original side of the room (side 1)")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Composante Z de(Joueur exécutant.InitialPosition) >= 0;
+		Composante Z de(Position de(Joueur exécutant)) < 0;
+		Héros de(Joueur exécutant) == Héros(Brigitte);
+		Partie en cours == Vrai;
+		Joueur exécutant.InitialPosition != 0;
+	}
+
+	actions
+	{
+		Téléportation(Joueur exécutant, Vecteur(Composante X de(Position de(Joueur exécutant)), Composante Y de(Position de(
+			Joueur exécutant)), 0));
+		Attente(0.100, Ignorer la condition);
+		Boucle si la condition est vraie;
+	}
+}
+
+règle("Can move only in the original side of the room (side 2)")
+{
+	évènement
+	{
+		Toute la partie - Chaque joueur;
+		Les deux;
+		Tout;
+	}
+
+	conditions
+	{
+		Composante Z de(Joueur exécutant.InitialPosition) <= 0;
+		Composante Z de(Position de(Joueur exécutant)) > 0;
+		Héros de(Joueur exécutant) == Héros(Brigitte);
+		Partie en cours == Vrai;
+		Joueur exécutant.InitialPosition != 0;
+	}
+
+	actions
+	{
+		Téléportation(Joueur exécutant, Vecteur(Composante X de(Position de(Joueur exécutant)), Composante Y de(Position de(
+			Joueur exécutant)), 0));
+		Attente(0.100, Ignorer la condition);
+		Boucle si la condition est vraie;
+	}
+}
